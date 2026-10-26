@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="es" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOLUCAR MAS - Repuestos y Soluciones Automotrices</title>
+    <meta name="description" content="Repuestos, insumos y soluciones para talleres mecánicos y flotas. Gestión ágil y confiable.">
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome para Íconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#1d4ed8', // Azul profesional
+                        primaryHover: '#1e40af',
+                        darkBg: '#0f172a',
+                        darkCard: '#1e293b',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Transiciones suaves para el cambio de tema */
+        body {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        /* Ocultar scrollbar en contenedor de categorías móvil */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-darkBg dark:text-slate-200 antialiased flex flex-col min-h-screen">
+
+    <!-- Toast Notification (Reemplazo de Alert) -->
+    <div id="toast" class="fixed top-20 right-5 z-50 transform transition-all duration-300 translate-x-full opacity-0 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3">
+        <i class="fa-solid fa-circle-check text-xl"></i>
+        <div>
+            <h4 class="font-bold text-sm">¡Añadido al carrito!</h4>
+            <p class="text-xs">El producto se agregó correctamente.</p>
+        </div>
+    </div>
+
+    <!-- Topbar (Información de contacto) -->
+    <div class="bg-primary text-white text-xs py-2 px-4 hidden md:block">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex gap-4">
+                <span><i class="fa-solid fa-phone mr-1"></i> +56 9 1234 5678</span>
+                <span><i class="fa-solid fa-envelope mr-1"></i> contacto@solucarmas.cl</span>
+            </div>
+            <div class="flex gap-4">
+                <a href="#" class="hover:text-gray-200 transition">Despachos</a>
+                <a href="#" class="hover:text-gray-200 transition">Devoluciones</a>
+                <a href="#" class="hover:text-gray-200 transition">Contacto</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header / Navbar -->
+    <header class="bg-white dark:bg-darkCard shadow-sm sticky top-0 z-40 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex items-center justify-between gap-4 md:gap-8">
+                
+                <!-- Menú Móvil & Logo -->
+                <div class="flex items-center gap-4">
+                    <button class="md:hidden text-2xl text-slate-600 dark:text-slate-300 hover:text-primary">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <a href="#" class="flex items-center gap-2">
+                        <img src="Logo_4_SOLUCAR-removebg-preview.png" alt="SOLUCAR MAS Logo" class="h-12 md:h-16 w-auto transition-all duration-300 dark:drop-shadow-[0_0_12px_rgba(255,255,255,0.85)] dark:brightness-110">
+                    </a>
+                </div>
+
+                <!-- Barra de Búsqueda (Centro) -->
+                <div class="hidden md:flex flex-1 max-w-2xl relative">
+                    <input type="text" placeholder="Busca por marca, modelo, repuesto o SKU..." 
+                           class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-full py-3 px-6 pl-12 text-sm focus:ring-2 focus:ring-primary dark:text-white outline-none transition-shadow">
+                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                    <button class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-primary hover:bg-primaryHover text-white px-4 py-1.5 rounded-full text-sm font-medium transition-colors">
+                        Buscar
+                    </button>
+                </div>
+
+                <!-- Acciones (Derecha) -->
+                <div class="flex items-center gap-3 md:gap-6">
+                    <!-- Botón Modo Oscuro/Claro -->
+                    <button id="theme-toggle" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors tooltip-container relative">
+                        <i id="theme-icon-light" class="fa-solid fa-sun text-xl hidden"></i>
+                        <i id="theme-icon-dark" class="fa-solid fa-moon text-xl"></i>
+                    </button>
+
+                    <!-- Cuenta -->
+                    <a href="#" class="hidden md:flex flex-col items-center text-slate-600 dark:text-slate-300 hover:text-primary transition-colors">
+                        <i class="fa-regular fa-user text-xl"></i>
+                        <span class="text-xs font-medium mt-1">Mi Cuenta</span>
+                    </a>
+
+                    <!-- Carrito -->
+                    <a href="#" class="flex items-center gap-2 text-slate-600 dark:text-slate-300 hover:text-primary transition-colors relative">
+                        <div class="relative">
+                            <i class="fa-solid fa-cart-shopping text-2xl"></i>
+                            <span id="cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white dark:border-darkCard">
+                                0
+                            </span>
+                        </div>
+                        <div class="hidden md:flex flex-col">
+                            <span class="text-xs text-slate-400">Mi Carrito</span>
+                            <span id="cart-total" class="text-sm font-bold text-slate-900 dark:text-white">$0</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Barra de Búsqueda Móvil -->
+            <div class="mt-4 relative md:hidden">
+                <input type="text" placeholder="Buscar repuestos..." 
+                       class="w-full bg-slate-100 dark:bg-slate-800 rounded-full py-2.5 px-4 pl-10 text-sm focus:ring-2 focus:ring-primary dark:text-white outline-none">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow">
+        
+        <!-- Hero Section (Simple y Limpio) -->
+        <section class="max-w-7xl mx-auto px-4 py-8">
+            <div class="bg-gradient-to-r from-slate-900 to-slate-800 dark:from-slate-800 dark:to-slate-700 rounded-3xl overflow-hidden shadow-lg relative flex flex-col md:flex-row items-center">
+                <div class="p-8 md:p-12 z-10 w-full md:w-1/2 text-center md:text-left">
+                    <span class="inline-block py-1 px-3 rounded-full bg-primary/20 text-blue-300 text-xs font-bold mb-4 border border-primary/30">
+                        Especialistas en Talleres y Flotas
+                    </span>
+                    <h1 class="text-3xl md:text-5xl font-bold text-white mb-4 leading-tight">
+                        Encuentra el repuesto exacto, <span class="text-blue-400">sin complicaciones.</span>
+                    </h1>
+                    <p class="text-slate-300 mb-8 max-w-md mx-auto md:mx-0">
+                        Gestión ágil y confiable. Accede a nuestro catálogo completo de insumos y soluciones automotrices.
+                    </p>
+                    <button class="bg-primary hover:bg-primaryHover text-white px-8 py-3 rounded-full font-semibold shadow-lg shadow-primary/30 transition-all hover:scale-105">
+                        Ver Catálogo Completo
+                    </button>
+                </div>
+                <!-- Gráfico de fondo/Ilustración -->
+                <div class="w-full md:w-1/2 h-64 md:h-auto relative opacity-50 md:opacity-100 p-8">
+                    <img src="https://placehold.co/600x400/transparent/white?text=Imagen+Auto+Parts" alt="Auto Parts Illustration" class="w-full h-full object-contain drop-shadow-2xl">
+                </div>
+            </div>
+        </section>
+
+        <!-- Categorías (Diseño limpio y espacioso) -->
+        <section class="max-w-7xl mx-auto px-4 py-8">
+            <div class="flex justify-between items-end mb-6">
+                <h2 class="text-2xl font-bold text-slate-900 dark:text-white">¿Qué estás buscando?</h2>
+            </div>
+            
+            <div class="flex overflow-x-auto gap-4 pb-4 no-scrollbar snap-x">
+                <!-- Categoria 1 -->
+                <a href="#" class="snap-start shrink-0 w-32 md:w-auto md:flex-1 bg-white dark:bg-darkCard p-6 rounded-2xl shadow-sm hover:shadow-md border border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center gap-3 transition-all hover:border-primary group">
+                    <div class="w-14 h-14 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-gears text-2xl"></i>
+                    </div>
+                    <span class="font-medium text-sm text-slate-700 dark:text-slate-300">Motor</span>
+                </a>
+                
+                <!-- Categoria 2 -->
+                <a href="#" class="snap-start shrink-0 w-32 md:w-auto md:flex-1 bg-white dark:bg-darkCard p-6 rounded-2xl shadow-sm hover:shadow-md border border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center gap-3 transition-all hover:border-primary group">
+                    <div class="w-14 h-14 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-compact-disc text-2xl"></i>
+                    </div>
+                    <span class="font-medium text-sm text-slate-700 dark:text-slate-300">Frenos</span>
+                </a>
+
+                <!-- Categoria 3 -->
+                <a href="#" class="snap-start shrink-0 w-32 md:w-auto md:flex-1 bg-white dark:bg-darkCard p-6 rounded-2xl shadow-sm hover:shadow-md border border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center gap-3 transition-all hover:border-primary group">
+                    <div class="w-14 h-14 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-car-side text-2xl"></i>
+                    </div>
+                    <span class="font-medium text-sm text-slate-700 dark:text-slate-300">Suspensión</span>
+                </a>
+
+                <!-- Categoria 4 -->
+                <a href="#" class="snap-start shrink-0 w-32 md:w-auto md:flex-1 bg-white dark:bg-darkCard p-6 rounded-2xl shadow-sm hover:shadow-md border border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center gap-3 transition-all hover:border-primary group">
+                    <div class="w-14 h-14 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-toolbox text-2xl"></i>
+                    </div>
+                    <span class="font-medium text-sm text-slate-700 dark:text-slate-300">Herramientas</span>
+                </a>
+
+                <!-- Categoria 5 -->
+                <a href="#" class="snap-start shrink-0 w-32 md:w-auto md:flex-1 bg-white dark:bg-darkCard p-6 rounded-2xl shadow-sm hover:shadow-md border border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center gap-3 transition-all hover:border-primary group">
+                    <div class="w-14 h-14 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-lightbulb text-2xl"></i>
+                    </div>
+                    <span class="font-medium text-sm text-slate-700 dark:text-slate-300">Iluminación</span>
+                </a>
+            </div>
+        </section>
+
+        <!-- Productos Destacados -->
+        <section class="max-w-7xl mx-auto px-4 py-12">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Productos Destacados</h2>
+                <a href="#" class="text-primary font-medium hover:underline text-sm">Ver todos <i class="fa-solid fa-arrow-right ml-1"></i></a>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                <!-- Producto 1 -->
+                <div class="bg-white dark:bg-darkCard rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden group hover:shadow-lg transition-all flex flex-col">
+                    <div class="relative pt-[100%] bg-slate-50 dark:bg-slate-800">
+                        <img src="https://placehold.co/400x400/f8fafc/94a3b8?text=Aceite+Motor" alt="Aceite de Motor" class="absolute top-0 left-0 w-full h-full object-contain p-4 mix-blend-multiply dark:mix-blend-normal">
+                        <span class="absolute top-3 left-3 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full">-15%</span>
+                    </div>
+                    <div class="p-4 flex flex-col flex-grow">
+                        <span class="text-xs text-slate-400 mb-1">Lubricantes</span>
+                        <h3 class="font-semibold text-slate-900 dark:text-white text-sm md:text-base leading-tight mb-2 line-clamp-2">Aceite de Motor Sintético 5W-30 4L</h3>
+                        <div class="mt-auto pt-4 flex items-end justify-between">
+                            <div>
+                                <p class="text-xs text-slate-400 line-through">$35.000</p>
+                                <p class="font-bold text-lg text-slate-900 dark:text-white">$29.750</p>
+                            </div>
+                            <button onclick="addToCart(29750)" class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 text-primary dark:text-white flex items-center justify-center hover:bg-primary hover:text-white transition-colors">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Producto 2 -->
+                <div class="bg-white dark:bg-darkCard rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden group hover:shadow-lg transition-all flex flex-col">
+                    <div class="relative pt-[100%] bg-slate-50 dark:bg-slate-800">
+                        <img src="https://placehold.co/400x400/f8fafc/94a3b8?text=Filtro+Aire" alt="Filtro de Aire" class="absolute top-0 left-0 w-full h-full object-contain p-4 mix-blend-multiply dark:mix-blend-normal">
+                    </div>
+                    <div class="p-4 flex flex-col flex-grow">
+                        <span class="text-xs text-slate-400 mb-1">Filtros</span>
+                        <h3 class="font-semibold text-slate-900 dark:text-white text-sm md:text-base leading-tight mb-2 line-clamp-2">Filtro de Aire Premium Multimarca</h3>
+                        <div class="mt-auto pt-4 flex items-end justify-between">
+                            <div>
+                                <p class="font-bold text-lg text-slate-900 dark:text-white">$12.500</p>
+                            </div>
+                            <button onclick="addToCart(12500)" class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 text-primary dark:text-white flex items-center justify-center hover:bg-primary hover:text-white transition-colors">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Producto 3 -->
+                <div class="bg-white dark:bg-darkCard rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden group hover:shadow-lg transition-all flex flex-col">
+                    <div class="relative pt-[100%] bg-slate-50 dark:bg-slate-800">
+                        <img src="https://placehold.co/400x400/f8fafc/94a3b8?text=Bateria+Auto" alt="Batería" class="absolute top-0 left-0 w-full h-full object-contain p-4 mix-blend-multiply dark:mix-blend-normal">
+                        <span class="absolute top-3 left-3 bg-blue-500 text-white text-[10px] font-bold px-2 py-1 rounded-full">Nuevo</span>
+                    </div>
+                    <div class="p-4 flex flex-col flex-grow">
+                        <span class="text-xs text-slate-400 mb-1">Baterías</span>
+                        <h3 class="font-semibold text-slate-900 dark:text-white text-sm md:text-base leading-tight mb-2 line-clamp-2">Batería 12V 55Ah Libre Mantención</h3>
+                        <div class="mt-auto pt-4 flex items-end justify-between">
+                            <div>
+                                <p class="font-bold text-lg text-slate-900 dark:text-white">$65.900</p>
+                            </div>
+                            <button onclick="addToCart(65900)" class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 text-primary dark:text-white flex items-center justify-center hover:bg-primary hover:text-white transition-colors">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Producto 4 -->
+                <div class="bg-white dark:bg-darkCard rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden group hover:shadow-lg transition-all flex flex-col">
+                    <div class="relative pt-[100%] bg-slate-50 dark:bg-slate-800">
+                        <img src="https://placehold.co/400x400/f8fafc/94a3b8?text=Pastillas+Freno" alt="Pastillas de Freno" class="absolute top-0 left-0 w-full h-full object-contain p-4 mix-blend-multiply dark:mix-blend-normal">
+                    </div>
+                    <div class="p-4 flex flex-col flex-grow">
+                        <span class="text-xs text-slate-400 mb-1">Frenos</span>
+                        <h3 class="font-semibold text-slate-900 dark:text-white text-sm md:text-base leading-tight mb-2 line-clamp-2">Juego de Pastillas de Freno Delanteras Cerámicas</h3>
+                        <div class="mt-auto pt-4 flex items-end justify-between">
+                            <div>
+                                <p class="font-bold text-lg text-slate-900 dark:text-white">$24.300</p>
+                            </div>
+                            <button onclick="addToCart(24300)" class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 text-primary dark:text-white flex items-center justify-center hover:bg-primary hover:text-white transition-colors">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección de Marcas (Confianza visual sin ruido) -->
+        <section class="max-w-7xl mx-auto px-4 py-8 border-t border-slate-200 dark:border-slate-800">
+            <p class="text-center text-sm font-medium text-slate-500 mb-6">Trabajamos con las mejores marcas del mercado</p>
+            <div class="flex flex-wrap justify-center gap-8 md:gap-16 opacity-60 grayscale hover:grayscale-0 transition-all">
+                <!-- Placeholders de marcas usando texto para mantenerlo ligero -->
+                <div class="text-xl font-bold font-serif">BOSCH</div>
+                <div class="text-xl font-bold uppercase tracking-wider">Castrol</div>
+                <div class="text-xl font-bold italic">ACDelco</div>
+                <div class="text-xl font-bold">VALEO</div>
+                <div class="text-xl font-bold tracking-widest">NGK</div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer Simple y Limpio -->
+    <footer class="bg-white dark:bg-darkCard border-t border-slate-200 dark:border-slate-800 mt-12">
+        <div class="max-w-7xl mx-auto px-4 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- Columna 1 -->
+                <div class="md:col-span-1">
+                    <a href="#" class="flex items-center gap-2 mb-4">
+                        <img src="Logo_4_SOLUCAR-removebg-preview.png" alt="SOLUCAR MAS Logo" class="h-12 w-auto transition-all duration-300 dark:drop-shadow-[0_0_12px_rgba(255,255,255,0.85)] dark:brightness-110">
+                    </a>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
+                        Repuestos, insumos y soluciones automotrices para talleres mecánicos y flotas. Compra rápido, seguro y confiable.
+                    </p>
+                </div>
+                
+                <!-- Columna 2 -->
+                <div>
+                    <h4 class="font-bold text-slate-900 dark:text-white mb-4">Navegación</h4>
+                    <ul class="space-y-2 text-sm text-slate-600 dark:text-slate-400">
+                        <li><a href="#" class="hover:text-primary transition-colors">Inicio</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Catálogo de Repuestos</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Marcas</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Ofertas</a></li>
+                    </ul>
+                </div>
+
+                <!-- Columna 3 -->
+                <div>
+                    <h4 class="font-bold text-slate-900 dark:text-white mb-4">Atención al Cliente</h4>
+                    <ul class="space-y-2 text-sm text-slate-600 dark:text-slate-400">
+                        <li><a href="#" class="hover:text-primary transition-colors">Seguimiento de Pedido</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Cambios y Devoluciones</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Términos y Condiciones</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Preguntas Frecuentes</a></li>
+                    </ul>
+                </div>
+
+                <!-- Columna 4 -->
+                <div>
+                    <h4 class="font-bold text-slate-900 dark:text-white mb-4">Contacto</h4>
+                    <ul class="space-y-3 text-sm text-slate-600 dark:text-slate-400">
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-location-dot mt-1 text-slate-400"></i>
+                            <span>Av. Principal 1234, Santiago, Chile</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fa-solid fa-phone text-slate-400"></i>
+                            <span>+56 9 1234 5678</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fa-solid fa-envelope text-slate-400"></i>
+                            <span>contacto@solucarmas.cl</span>
+                        </li>
+                    </ul>
+                    
+                    <div class="flex gap-4 mt-6">
+                        <a href="#" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-primary hover:bg-blue-50 transition-colors"><i class="fa-brands fa-facebook-f"></i></a>
+                        <a href="#" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-pink-500 hover:bg-pink-50 transition-colors"><i class="fa-brands fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-slate-200 dark:border-slate-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500">
+                <p>&copy; 2024 SOLUCAR MAS. Todos los derechos reservados.</p>
+                <div class="flex gap-2">
+                    <i class="fa-brands fa-cc-visa text-2xl"></i>
+                    <i class="fa-brands fa-cc-mastercard text-2xl"></i>
+                    <i class="fa-brands fa-cc-paypal text-2xl"></i>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // Funcionalidad Tema Oscuro / Claro
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const darkIcon = document.getElementById('theme-icon-dark');
+        const lightIcon = document.getElementById('theme-icon-light');
+        
+        // Revisar preferencia previa o del sistema
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            lightIcon.classList.remove('hidden');
+            darkIcon.classList.add('hidden');
+        } else {
+            document.documentElement.classList.remove('dark');
+            darkIcon.classList.remove('hidden');
+            lightIcon.classList.add('hidden');
+        }
+
+        themeToggleBtn.addEventListener('click', function() {
+            darkIcon.classList.toggle('hidden');
+            lightIcon.classList.toggle('hidden');
+
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('color-theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('color-theme', 'dark');
+            }
+        });
+
+        // Simulación de agregar al carrito sin usar "alert()"
+        let cartTotal = 0;
+        let cartCount = 0;
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(amount);
+        }
+
+        function addToCart(price) {
+            // Actualizar variables
+            cartCount++;
+            cartTotal += price;
+            
+            // Actualizar DOM
+            document.getElementById('cart-count').innerText = cartCount;
+            document.getElementById('cart-total').innerText = formatCurrency(cartTotal);
+            
+            // Mostrar notificación Toast
+            const toast = document.getElementById('toast');
+            toast.classList.remove('translate-x-full', 'opacity-0');
+            toast.classList.add('translate-x-0', 'opacity-100');
+            
+            // Ocultar notificación después de 3 segundos
+            setTimeout(() => {
+                toast.classList.remove('translate-x-0', 'opacity-100');
+                toast.classList.add('translate-x-full', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
