@@ -1,0 +1,17 @@
+SOLUCAR MÁS — PATENTE Y MEDIOS DE PAGO
+
+1. PUBLICAR LA WEB
+Sube todos los archivos y carpetas del paquete a la raíz de GitHub Pages, reemplazando los existentes. Conserva el CNAME.
+
+2. COTIZACIONES
+El formulario solicita obligatoriamente la patente. El navegador la envía a Supabase y la función enviar-cotizacion la incorpora en el correo y en el CSV adjunto.
+CRÍTICO: actualiza/despliega nuevamente la función supabase/functions/enviar-cotizacion/index.ts en Supabase Edge Functions. Si subes solo la web a GitHub, la función anterior NO recibirá correctamente el nuevo campo.
+
+3. TIENDA Y MEDIOS DE PAGO
+Se muestran transferencia bancaria y tarjeta de débito/crédito COMO PREFERENCIAS A COORDINAR, no medios confirmados ni pagos activos. El cliente puede seleccionar la preferencia en su solicitud de carrito. Este formulario aún abre su aplicación de correo (mailto) y debe enviarlo manualmente.
+NO ingreses datos bancarios, tarjetas ni claves en el HTML. Para aceptar pagos reales, conecta una pasarela como Webpay o Mercado Pago desde un backend seguro y confirma los pagos mediante notificaciones verificadas del proveedor. Para transferencias, indica datos bancarios solo después de verificarlos con la empresa.
+
+4. PRUEBAS
+Prueba cotización con patente válida y comprueba que aparezca en el correo y en el archivo .csv. En la tienda, agrega un producto, selecciona el medio preferido y comprueba que la solicitud incluya esa preferencia.
+
+NOTA: No se ha probado el envío real ni se han habilitado cobros. La tienda sigue usando precios de muestra y carrito local.

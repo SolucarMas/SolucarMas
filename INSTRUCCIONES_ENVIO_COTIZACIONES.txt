@@ -1,0 +1,43 @@
+SOLUCAR MÁS — COTIZACIONES AUTOMÁTICAS
+=====================================
+
+QUÉ HACE
+- El cliente completa la cotización en index.html y presiona Enviar cotización.
+- El navegador envía los datos a una función segura de Supabase.
+- La función envía un correo a contacto@solucarmas.cl con los datos y un archivo CSV adjunto, compatible con Excel.
+- Si Resend responde con éxito, se muestra confirmación; nunca se confirma antes del envío.
+- Contacto y carrito conservan su funcionamiento anterior (abrir app de correo).
+
+1. RESEND (NECESARIO)
+- Crea o abre tu cuenta de https://resend.com y verifica que controles el dominio solucarmas.cl.
+- Añade en el DNS los registros EXACTOS que indique Resend; no reemplaces los A/CNAME de GitHub Pages.
+- Crea una API key para enviar correos. NO la pongas en GitHub ni en el navegador.
+
+2. SUPABASE EDGE FUNCTION
+- Dashboard de tu proyecto > Edge Functions > Create new function.
+- Nombre exacto: enviar-cotizacion
+- Pega el contenido de supabase/functions/enviar-cotizacion/index.ts y despliega.
+- CONFIGURACIÓN IMPORTANTE: desactiva Verify JWT para esta función, porque los visitantes deben poder cotizar sin registrarse. El código valida origen, campos y contiene un honeypot básico. Para alto volumen, agrega protección antispam y límite de frecuencia antes de anunciarlo públicamente.
+- En Edge Functions > Secrets agrega:
+   RESEND_API_KEY = tu clave secreta de Resend
+   QUOTE_FROM_EMAIL = SOLUCAR MAS <cotizaciones@solucarmas.cl>
+  Esta dirección remitente debe pertenecer a tu dominio VERIFICADO en Resend.
+- El destinatario queda fijo en contacto@solucarmas.cl.
+- Si habilitas TURNSTILE_SECRET_KEY debes además integrar el widget Turnstile y enviar turnstileToken desde el frontend. No añadas este secreto sin modificar el formulario.
+
+3. GITHUB PAGES
+- Sube los archivos de este ZIP a la raíz del repositorio de solucarmas.cl.
+- Reemplaza index.html y app.js; conserva el resto.
+- No subas ni publiques RESEND_API_KEY.
+
+4. PRUEBA
+- Solicita una cotización de prueba con datos ficticios y tu correo accesible.
+- Comprueba que llegue un email a contacto@solucarmas.cl con cotizacion-COT-...csv adjunto.
+- Revisa Spam y el registro de mensajes en Resend si no llega.
+- Abre el CSV en Excel: sus campos estarán divididos por punto y coma, con caracteres españoles.
+- La función necesita estar desplegada y los secretos configurados: subir solo el ZIP a GitHub NO activa el correo.
+
+SEGURIDAD
+- Las claves API solo se almacenan en Secrets de Supabase.
+- Es un formulario público: para producción con tráfico significativo, recomendamos activar CAPTCHA y rate limiting.
+- Nunca uses el endpoint del remitente desde JavaScript con la API key de Resend.
