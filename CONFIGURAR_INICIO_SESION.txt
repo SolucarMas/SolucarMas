@@ -1,0 +1,21 @@
+SOLUCAR MÁS — REGISTRO E INICIO DE SESIÓN CON VERIFICACIÓN DE CORREO
+
+1. Crea un proyecto en https://supabase.com (un proyecto de tu propiedad).
+2. En Supabase, busca Settings → API Keys (o Connect): copia Project URL y la clave publishable/anon PÚBLICA.
+3. Abre supabase-config.js y reemplaza los dos valores de ejemplo. Nunca pongas service_role ni secret keys en GitHub.
+4. En Authentication → Providers → Email activa Email y "Confirm email" (confirmación de correo).
+5. En Authentication → URL Configuration establece Site URL: https://solucarmas.cl
+   Y añade Redirect URL permitida: https://solucarmas.cl/cuenta.html
+   Si también usas www, añade https://www.solucarmas.cl/cuenta.html.
+   Si pruebas con GitHub Pages, autoriza la ruta EXACTA de tu web GitHub Pages.
+6. Configura un proveedor SMTP propio antes del lanzamiento, para el envío confiable de mensajes a clientes. El correo integrado de prueba de Supabase puede estar restringido.
+7. Sube todos los archivos y carpetas del ZIP a la RAÍZ del repositorio GitHub, reemplazando los anteriores.
+   No elimines CNAME. Comprueba https://solucarmas.cl/cuenta.html
+8. Prueba: registrar cuenta, recibir correo, hacer clic en enlace, iniciar sesión, cerrar sesión, recuperar contraseña.
+
+IMPORTANTE:
+- Sin pasos 1-6, la página mostrará "Falta configurar el acceso" y no podrá enviar correos ni iniciar sesión.
+- GitHub Pages puede alojar esta interfaz; Supabase valida las credenciales y confirma el correo.
+- Esta versión NO implementa una base de datos de pedidos, panel de administración ni pagos online.
+- No pongas claves privadas, contraseñas de clientes ni service_role en el repositorio público.
+- La clave publicable no es una clave secreta. Aplica RLS antes de añadir tablas de datos privados.

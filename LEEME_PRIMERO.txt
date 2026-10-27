@@ -1,0 +1,22 @@
+SOLUCAR MÁS — CORRECCIÓN DEL ACCESO DE CLIENTES
+
+Problema resuelto: cuenta.html ahora incorpora sus estilos, logos y JavaScript.
+
+Para instalar en GitHub Pages:
+1. Abre el repositorio de tu sitio solucarmas.cl.
+2. Conserva tu archivo CNAME si existe.
+3. Sube TODOS los archivos y carpetas que vienen en este ZIP a la raíz
+   del repositorio (sin agregar una carpeta intermedia).
+4. Confirma los cambios (Commit changes).
+5. Entra a https://solucarmas.cl/cuenta.html y recarga con Ctrl+F5.
+
+IMPORTANTE: para que el registro y los correos funcionen, edita supabase-config.js
+y coloca solo tu Project URL y tu PUBLISHABLE KEY (o anon key pública).
+Nunca compartas ni publiques secret keys o service_role.
+En Supabase > Authentication > URL Configuration agrega
+https://solucarmas.cl/cuenta.html como URL de redirección.
+Activa Confirm email en el proveedor Email. Para correo real considera SMTP.
+
+La página de cuentas ahora se visualizará correctamente incluso si olvidaste
+subir styles.css, cuenta.css o assets; las otras páginas siguen necesitando
+sus archivos CSS/JS/assets incluidos en este paquete.
