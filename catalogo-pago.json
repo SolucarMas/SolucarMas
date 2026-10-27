@@ -1,0 +1,50 @@
+[
+  {
+    "id": "filter-oil",
+    "name": "F",
+    "price": 8900,
+    "img": "assets/producto-filter-oil.svg"
+  },
+  {
+    "id": "filter-air",
+    "name": "F",
+    "price": 12900,
+    "img": "assets/producto-filter-air.svg"
+  },
+  {
+    "id": "oil-5w30",
+    "name": "A",
+    "price": 29900,
+    "img": "assets/producto-oil-5w30.svg"
+  },
+  {
+    "id": "oil-15w40",
+    "name": "A",
+    "price": 25900,
+    "img": "assets/producto-oil-15w40.svg"
+  },
+  {
+    "id": "pads",
+    "name": "P",
+    "price": 27900,
+    "img": "assets/producto-pads.svg"
+  },
+  {
+    "id": "bulb",
+    "name": "A",
+    "price": 6900,
+    "img": "assets/producto-bulb.svg"
+  },
+  {
+    "id": "wipers",
+    "name": "L",
+    "price": 9900,
+    "img": "assets/producto-wipers.svg"
+  },
+  {
+    "id": "coolant",
+    "name": "R",
+    "price": 7500,
+    "img": "assets/producto-coolant.svg"
+  }
+]

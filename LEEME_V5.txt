@@ -1,0 +1,26 @@
+SOLUCAR MÁS — ACTUALIZACIÓN V5
+=================================
+
+1. SUBIR A GITHUB PAGES
+Sube el CONTENIDO de esta carpeta a la RAÍZ del repositorio que publica solucarmas.cl. Reemplaza index.html, tienda.html, app.js, styles.css, etc.
+IMPORTANTE: también añade pago.html, pago.js, pago.css, catalogo-pago.json, y TODA la carpeta assets/ con las imágenes de productos y de la Peugeot Partner. Conserva el archivo CNAME.
+No edites únicamente index.html o únicamente app.js: la nueva navegación y los recursos dependen de que todos se publiquen juntos.
+Tras el deploy, recarga con Ctrl+F5. El paquete incluye ?v=20261027v5 para invalidar caché de JS y CSS.
+
+2. QUÉ CAMBIÓ
+- El formulario de cotización (index.html#cotizar) muestra PATENTE DEL VEHÍCULO, obligatoria y resaltada al comienzo de los datos.
+- Su código JavaScript vuelve a validar la patente y la envía en el campo `patente`. La Edge Function incluida ya admite ese campo y lo incorpora al correo/CSV. Si aún está activa la versión antigua de esa función, despliega la versión del paquete en Supabase.
+- El carrito dirige a pago.html en una página NUEVA. Allí se solicitan datos personales, se selecciona transferencia o tarjeta como medio PREFERIDO, y se revisa el resumen.
+- La tienda muestra ocho ILUSTRACIONES de producto en assets/producto-*.svg. No son fotos de stock real ni acreditan compatibilidad/stock.
+- La ilustración de una Peugeot Partner accidentada se guarda en assets/peugeot-partner-accidentada.webp y se muestra en el bloque de tienda de la portada. Es una imagen creada digitalmente, no fotografía de un caso real.
+
+3. MUY IMPORTANTE: PAGOS NO ACTIVADOS
+Esta pantalla NO COBRA ni pide datos bancarios. Cuando el cliente pulsa «Preparar solicitud» se abre su correo con mailto: y DEBE enviarlo manualmente. No se registra un pedido pagado en Supabase.
+Para aceptar pagos reales, necesitarás datos comerciales y conectar una pasarela de pagos chilena con backend seguro y confirmaciones verificadas. Nunca pongas claves secretas en GitHub.
+
+4. PRUEBAS
+- Abre solucarmas.cl/index.html#cotizar: comprobar patente en primer bloque.
+- Realiza una cotización de prueba: confirma que la patente aparece en el email/CSV, siempre que hayas publicado la función y configurado RESEND_API_KEY + QUOTE_FROM_EMAIL en Supabase.
+- En tienda.html agrega un producto al carrito y pulsa «Continuar al pago»: debe abrir solucarmas.cl/pago.html. Elige un método e intenta preparar la solicitud.
+- Confirma imágenes de productos y Peugeot sin enlaces externos rotos.
+- Verifica también el modo oscuro/claro y acceso a la cuenta.
