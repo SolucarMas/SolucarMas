@@ -1,0 +1,9 @@
+SOLUCAR MAS - CORRECCION INICIO DE SESION
+
+1. En GitHub sube estos tres archivos a la raiz del repositorio: cuenta.html, cuenta.js, supabase-config.js.
+2. Reemplaza los anteriores y confirma con Commit changes.
+3. No elimines ni cambies tu CNAME, index.html, tienda.html o archivos del sitio.
+4. Abre https://solucarmas.cl/cuenta.html y actualiza con Ctrl + F5.
+5. En Supabase Authentication confirma que Email/Confirm email y las URLs autorizadas esten configuradas.
+6. En Resend confirma que el dominio este Verified y configura el SMTP en Supabase antes de utilizar correos reales.
+7. El archivo supabase-config.js contiene solo la clave publishable (publica). Nunca coloques secret keys o claves SMTP en GitHub.
