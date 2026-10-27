@@ -1,0 +1,13 @@
+SOLUCAR MÁS — CORRECCIÓN V3 (27 octubre 2026)
+
+1. Descomprime el ZIP. Sube TODO su contenido a la RAÍZ del repositorio que publica solucarmas.cl. No subas únicamente los HTML. Mantén carpetas assets/ y supabase/.
+2. Haz commit. Espera a que GitHub Pages termine de publicar, luego abre https://solucarmas.cl/cuenta.html y recarga con Ctrl+F5.
+3. Los logos ya están incrustados en index.html, cuenta.html y tienda.html: se muestran incluso si falta assets/ en el servidor, y se alternan según el tema.
+4. IMPORTANTE: el error Failed to fetch NO se puede reparar solo con HTML si el servidor de Supabase no responde. Abre https://solucarmas.cl/diagnostico.html para comprobar la conexión de tu navegador.
+5. En https://supabase.com/dashboard selecciona el proyecto donde están tus usuarios. Si está PAUSED, pulsa Resume. En Settings > API/Connect copia Project URL y publishable/anon key exactas y reemplaza SOLO las dos cadenas de supabase-config.js. No uses service_role ni sb_secret_.
+6. En Supabase > Authentication > URL Configuration agrega https://solucarmas.cl y https://solucarmas.cl/cuenta.html a los URLs permitidos. Confirma que Email provider esté activado.
+7. No crees un nuevo proyecto por este error si necesitas conservar usuarios existentes: primero revisa o restaura el proyecto actual.
+8. Para identificar el origen del problema, presiona F12 > Red/Network y mira los errores de la solicitud a /auth/v1/signup. ERR_NAME_NOT_RESOLVED = DNS/URL/proyecto; ERR_BLOCKED_BY_CLIENT = extensión; una respuesta HTTP indica otro error del servicio.
+9. Si el registro funciona pero perfil/vehículos no, ejecuta supabase/esquema.sql una sola vez desde SQL Editor.
+
+NOTA: No fue posible verificar el estado interno ni recuperar la URL correcta de tu proyecto privado de Supabase. Para que el registro funcione, el URL del proyecto debe ser real y accesible.
