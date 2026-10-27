@@ -1,0 +1,48 @@
+SOLUCAR MÁS — ACTUALIZACIÓN DE LOGOS, CABECERA Y ACCESO
+======================================================
+
+ARCHIVOS LISTOS PARA GITHUB PAGES:
+- index.html: portada actualizada.
+- tienda.html: tienda compatible con tu carrito (faltaba entre los archivos adjuntos).
+- cuenta.html: registro, acceso y panel de clientes.
+- app.js, auth-nav.js, cuenta.js, styles.css, cuenta.css, supabase-config.js.
+- assets/logo-claro.png y assets/logo-oscuro.png: logos originales recortados para verse más grandes.
+- assets/*.svg: imágenes de respaldo.
+- supabase/esquema.sql y plantillas de correos.
+- CNAME: tu dominio solucarmas.cl.
+
+CAMBIOS VISIBLES:
+- Se quita el texto «Mi cuenta» de la barra superior de Inicio y Tienda.
+- El único acceso a registro/inicio de sesión en esa barra es el icono de persona.
+- El logo completo de SOLUCAR MÁS se ve en la cabecera sin texto duplicado.
+- Modo claro: logo azul oscuro y rojo. Modo oscuro: logo azul claro y rojo.
+- La preferencia de tema se conserva entre páginas, con preferencia del sistema al entrar por primera vez.
+- En el botón de usuario NO se muestra el nombre; al entrar a cuenta.html se saluda al usuario registrado.
+- «Mi cuenta» dentro del panel personal permanece, porque ese menú no es la barra superior.
+
+PUBLICACIÓN:
+1. En tu repositorio GitHub Pages, guarda una copia de seguridad.
+2. Descomprime y sube TODO el contenido de esta carpeta a la RAÍZ de la rama que publica el sitio. No subas una carpeta contenedora.
+3. Reemplaza archivos antiguos con los nombres EXACTOS (index.html, tienda.html, cuenta.html, styles.css...).
+4. Mantén la estructura de assets/ y supabase/ (en la raíz).
+5. Comprueba que CNAME dice solucarmas.cl y que GitHub Pages reconoce tu dominio.
+6. Espera que GitHub Pages despliegue la actualización, y recarga con Ctrl+F5.
+7. Prueba Inicio, Tienda, icono de usuario y cambio de tema en móvil y escritorio.
+
+SUPABASE (LA BASE DE DATOS NO SE MODIFICA AUTOMÁTICAMENTE):
+- Tu configuración pública se conserva en supabase-config.js.
+- Si aún no existe, ejecuta supabase/esquema.sql desde Supabase > SQL Editor.
+- Configura Authentication > URL Configuration con Site URL https://solucarmas.cl
+  y Redirect URL https://solucarmas.cl/cuenta.html.
+- En Authentication > Emails > Templates, pega el HTML de
+  supabase/correo-confirmacion.html y supabase/correo-recuperacion.html.
+  El ZIP no puede instalar estos correos dentro de Supabase por sí solo.
+- Jamás subas una clave service_role, sb_secret ni credenciales SMTP a GitHub.
+
+NOTAS:
+- Sin una conexión real a Supabase no es posible garantizar la verificación desde cada navegador.
+  Los bloqueadores de privacidad pueden impedir llamadas externas.
+- El carrito todavía prepara una solicitud por correo; no procesa pagos reales ni registra compras
+  como pagadas. Los productos y precios del catálogo actual son ejemplos.
+- La tienda.html suministrada es una reconstrucción compatible porque no adjuntaste ese archivo.
+  Si tu tienda existente tiene personalizaciones, conserva una copia antes de reemplazarla.

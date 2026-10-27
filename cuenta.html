@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+
+<html data-theme="light" lang="es">
+<head>
+<meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="Tu cuenta SOLUCAR MÁS: verifica tu correo, administra tus datos, vehículos y consulta tus pedidos." name="description"/>
+<meta content="#0b2039" name="theme-color"/><title>Mi cuenta | SOLUCAR MÁS</title>
+<link href="assets/logo-claro.png" rel="icon" type="image/png"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="cuenta.css" rel="stylesheet"/>
+<script>try{document.documentElement.dataset.theme=localStorage.getItem('solucar-theme')==='dark'?'dark':(localStorage.getItem('solucar-theme')==='light'?'light':(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'))}catch(e){document.documentElement.dataset.theme=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}</script>
+<script src="supabase-config.js"></script>
+<script defer="" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script defer="" src="cuenta.js"></script>
+</head>
+<body>
+<header class="auth-header"><div class="auth-container auth-nav">
+<a aria-label="SOLUCAR MÁS - Inicio" class="auth-brand" href="index.html"><img alt="SOLUCAR MÁS" class="logo-light" src="assets/logo-claro.png"/><img alt="" class="logo-dark" src="assets/logo-oscuro.png"/></a>
+<nav aria-label="Navegación"><a href="index.html">Inicio</a><a href="index.html#soluciones">Soluciones</a><a href="tienda.html">Tienda esencial</a><button aria-label="Cambiar modo claro y oscuro" class="theme-button" id="themeSwitch" type="button"><span aria-hidden="true">◐</span></button></nav>
+</div></header>
+<main>
+<section class="auth-scene" id="guestView">
+<div class="auth-container auth-layout">
+<div class="auth-story">
+<span class="auth-eyebrow">◉ ZONA DE CLIENTES</span>
+<h1>Tus soluciones, <span>en un solo lugar.</span></h1>
+<p>Tu cuenta para mantener tus datos al día y consultar tus pedidos. Una experiencia más simple para ti y tus vehículos.</p>
+<div class="auth-points"><span><b>✓</b> Correo verificado</span><span><b>✓</b> Datos y vehículos organizados</span><span><b>✓</b> Pedidos asociados a tu cuenta</span></div>
+<div class="brand-feature"><span>PARA SEGUIR AVANZANDO</span><strong>Tu operación es nuestra prioridad.</strong><small>Camiones · Transporte · Flotas</small></div>
+</div>
+<div class="auth-login-card">
+<div class="auth-notice" hidden="" id="authSetup"><strong>No pudimos activar el acceso.</strong><p>Comprueba la URL, la clave pública y la carga de Supabase. Los datos de conexión están en <code>supabase-config.js</code>.</p></div>
+<div aria-label="Acceso a cuenta" class="auth-tabs" role="tablist"><button aria-selected="true" class="selected" data-mode="login" role="tab" type="button">Iniciar sesión</button><button aria-selected="false" data-mode="signup" role="tab" type="button">Crear cuenta</button></div>
+<form autocomplete="on" id="authForm">
+<h2 id="formTitle">Bienvenido de nuevo</h2><p class="form-intro" id="formInfo">Ingresa tus datos para continuar.</p>
+<div class="field" hidden="" id="nameField"><label for="authName">Nombre y apellido</label><input autocomplete="name" id="authName" maxlength="120" placeholder="Tu nombre"/></div>
+<div class="field"><label for="authEmail">Correo electrónico</label><input autocomplete="email" id="authEmail" placeholder="nombre@correo.cl" required="" type="email"/></div>
+<div class="field"><label for="authPassword">Contraseña</label><input autocomplete="current-password" id="authPassword" minlength="8" placeholder="Mínimo 8 caracteres" required="" type="password"/></div>
+<div class="field" hidden="" id="repeatField"><label for="authRepeat">Repite la contraseña</label><input autocomplete="new-password" id="authRepeat" minlength="8" placeholder="Confirma tu contraseña" type="password"/></div>
+<button class="btn btn-primary" id="authSubmit" type="submit">Iniciar sesión</button>
+<div class="tools"><button class="text-button" id="forgotButton" type="button">¿Olvidaste tu contraseña?</button><button class="text-button" id="resendButton" type="button">Reenviar verificación</button></div>
+<p aria-live="polite" class="feedback" id="authMessage" role="status"></p>
+</form>
+<form hidden="" id="resetForm"><h2>Renueva tu contraseña</h2><p class="form-intro">Crea una nueva contraseña para tu cuenta.</p><div class="field"><label for="resetPassword">Nueva contraseña</label><input autocomplete="new-password" id="resetPassword" minlength="8" required="" type="password"/></div><div class="field"><label for="resetRepeat">Confirma la contraseña</label><input autocomplete="new-password" id="resetRepeat" minlength="8" required="" type="password"/></div><button class="btn btn-primary" type="submit">Guardar nueva contraseña</button><p class="feedback" id="resetMessage" role="status"></p></form>
+<div class="auth-security"><span aria-hidden="true">🔒</span> Tus claves se validan mediante Supabase. Nunca te pediremos contraseñas por correo.</div>
+</div>
+</div>
+</section>
+<section class="account-scene" hidden="" id="dashboardView">
+<div class="auth-container dashboard-heading"><div><span class="auth-eyebrow">ÁREA PERSONAL · SOLUCAR MÁS</span><h1>Hola, <span id="greetingName">bienvenido</span><span class="greeting-dot">.</span></h1><p>Tu información y tus vehículos, organizados en un solo lugar.</p></div><div class="verified-label"><span aria-hidden="true">✓</span> Correo confirmado</div></div>
+<div class="auth-container dashboard-grid">
+<aside class="dashboard-menu"><div class="mini-profile"><span class="avatar" id="avatar">S</span><div><strong id="menuName">Mi cuenta</strong><small id="menuEmail"></small></div></div><nav aria-label="Mi cuenta"><button class="active" data-section="resumen" type="button"><span>⌂</span> Resumen</button><button data-section="pedidos" type="button"><span>▤</span> Mis compras</button><button data-section="perfil" type="button"><span>♙</span> Mis datos</button><button data-section="vehiculos" type="button"><span>▣</span> Mis vehículos</button></nav><button class="signout" id="signOut" type="button">Cerrar sesión ↗</button></aside>
+<div class="dash-content">
+<p class="feedback dashboard-notice" id="dashboardNotice" role="status"></p>
+<section class="panel-view" data-panel="resumen"><div class="dash-section-title"><div><span class="section-kicker">TU ESPACIO</span><h2>Resumen de tu cuenta</h2></div><a class="mini-link" href="tienda.html">Visitar tienda →</a></div>
+<div class="stat-grid"><div class="stat-card"><span class="stat-icon">▤</span><span class="stat-label">Pedidos registrados</span><strong id="orderCount">—</strong><button data-goto="pedidos" type="button">Ver historial →</button></div><div class="stat-card"><span class="stat-icon">▣</span><span class="stat-label">Vehículos guardados</span><strong id="vehicleCount">—</strong><button data-goto="vehiculos" type="button">Administrar →</button></div><div class="stat-card"><span class="stat-icon">✓</span><span class="stat-label">Estado de cuenta</span><strong class="status-verified">Verificada</strong><button data-goto="perfil" type="button">Mis datos →</button></div></div>
+<div class="overview-grid"><div class="box-card"><h3>Últimas compras</h3><div id="recentOrders"><p class="muted">Cargando compras...</p></div><button class="text-button" data-goto="pedidos" type="button">Ir al historial →</button></div><div class="box-card colored-card"><span class="section-kicker">ESTAMOS PARA AYUDARTE</span><h3>¿Necesitas un repuesto?</h3><p>Cuéntanos qué necesita tu vehículo y buscaremos alternativas para cotizar.</p><a class="btn btn-primary" href="index.html#cotizar">Solicitar cotización →</a></div></div>
+</section>
+<section class="panel-view" data-panel="pedidos" hidden=""><div class="dash-section-title"><div><span class="section-kicker">HISTORIAL</span><h2>Mis compras</h2></div></div><p class="muted">Aquí verás los pedidos confirmados y asociados a tu cuenta. Los carritos y solicitudes enviadas por correo no se registran automáticamente.</p><div class="order-list" id="orderList"><div class="empty-state">Cargando pedidos...</div></div></section>
+<section class="panel-view" data-panel="perfil" hidden=""><div class="dash-section-title"><div><span class="section-kicker">INFORMACIÓN PERSONAL</span><h2>Mis datos</h2></div></div><div class="box-card"><form id="profileForm"><div class="form-grid"><div class="field"><label for="profileName">Nombre y apellido *</label><input autocomplete="name" id="profileName" maxlength="120" name="full_name" required=""/></div><div class="field"><label for="profileEmail">Correo verificado</label><input autocomplete="email" id="profileEmail" readonly="" type="email"/></div><div class="field"><label for="profilePhone">Teléfono</label><input autocomplete="tel" id="profilePhone" maxlength="40" name="phone" placeholder="+56 9 ..."/></div><div class="field"><label for="profileCompany">Empresa (opcional)</label><input id="profileCompany" maxlength="120" name="company_name" placeholder="Nombre de tu empresa"/></div><div class="field"><label for="profileTown">Comuna</label><input id="profileTown" maxlength="120" name="comuna" placeholder="Ej. Santiago"/></div><div class="field"><label for="profileAddress">Dirección de despacho (opcional)</label><input autocomplete="street-address" id="profileAddress" maxlength="250" name="shipping_address" placeholder="Calle, número, oficina..."/></div></div><p class="fineprint">Estos datos solo se guardan en tu cuenta de Supabase si instalas las tablas y políticas de seguridad incluidas en el ZIP. La dirección guardada no genera por sí sola un despacho.</p><button class="btn btn-primary" id="saveProfile" type="submit">Guardar mis datos</button><p class="feedback" id="profileStatus" role="status"></p></form></div></section>
+<section class="panel-view" data-panel="vehiculos" hidden=""><div class="dash-section-title"><div><span class="section-kicker">TU FLOTA</span><h2>Mis vehículos</h2></div></div><div class="box-card"><h3>Agregar vehículo</h3><p class="muted">Guarda los datos básicos para tenerlos disponibles cuando necesites cotizar.</p><form id="vehicleForm"><div class="form-grid"><div class="field"><label for="vehicleNick">Nombre o apodo</label><input id="vehicleNick" maxlength="80" placeholder="Ej. Camión 1"/></div><div class="field"><label for="vehicleBrand">Marca *</label><input id="vehicleBrand" maxlength="80" placeholder="Ej. Volvo" required=""/></div><div class="field"><label for="vehicleModel">Modelo *</label><input id="vehicleModel" maxlength="100" placeholder="Ej. FH" required=""/></div><div class="field"><label for="vehicleYear">Año</label><input id="vehicleYear" max="2100" min="1950" placeholder="2022" type="number"/></div><div class="field"><label for="vehiclePlate">Patente (opcional)</label><input id="vehiclePlate" maxlength="20" placeholder="Patente"/></div></div><button class="btn btn-primary" id="saveVehicle" type="submit">Guardar vehículo</button><p class="feedback" id="vehicleStatus" role="status"></p></form></div><div class="vehicle-list" id="vehicleList"></div></section>
+</div>
+</div>
+</section>
+</main>
+<footer class="auth-footer"><div class="auth-container"><span>© <span id="authYear"></span> SOLUCAR MÁS · Soluciones automotrices.</span><a href="index.html#contacto">Contacto</a></div></footer>
+</body></html>
