@@ -1,0 +1,38 @@
+SOLUCAR MÁS — Sitio web estático
+================================
+
+ARCHIVOS
+- index.html: página principal (soluciones para transporte y flotas)
+- tienda/index.html: tienda esencial independiente
+- styles.css: estilos compartidos, modo claro/oscuro y animaciones
+- app.js: interacciones, filtros, cotizaciones, carrito y tema
+- assets/logo-claro.svg: propuesta de logo para fondos claros
+- assets/logo-oscuro.svg: propuesta de logo para fondos oscuros
+
+CÓMO PUBLICAR EN GITHUB PAGES
+1. Conserva estas rutas y nombres, incluyendo la carpeta tienda y assets.
+2. Sube TODOS los archivos a la raíz del repositorio (no la carpeta contenedora SOLUCAR_MAS_WEB).
+3. Asegúrate de que la rama y carpeta publicadas en Settings > Pages estén configuradas correctamente.
+4. Abre el dominio principal para ver index.html; Tienda esencial se abre en /tienda/.
+5. No borres styles.css ni app.js: ambas páginas los utilizan.
+
+ANTES DE PUBLICAR EL SITIO COMERCIAL
+- Ajusta SETTINGS.contactEmail en app.js y el correo visible en index.html y en pie de página.
+- Reemplaza fotografías remotas de Unsplash por imágenes propias o con licencia adecuada.
+  En la página principal, busca 'images.unsplash.com' y cambia las URLs.
+  Hay tres imágenes SVG de respaldo en assets/ que aparecen si fallan las fotografías.
+- Cambia los datos de producto del arreglo productList en app.js: ID, nombre, categoría,
+  precios reales, descripción y disponibilidad. Los datos actuales son demostrativos.
+- Confirma la política real de despacho, devoluciones y garantías, horarios y contacto.
+- Los logos son una propuesta vectorial nueva, NO una edición fiel del logo original,
+  pues en el HTML original solo aparecía una referencia a un archivo de imagen no adjunto.
+  Puedes reemplazar los SVG por el logo corporativo definitivo con versiones día/noche.
+
+LIMITACIONES IMPORTANTES
+- El carrito funciona en el navegador y se conserva en localStorage del dispositivo.
+- El checkout y los formularios utilizan mailto. El cliente debe enviar el correo manualmente.
+- No se cobra dinero, no se reserva stock, no existe base de datos de pedidos.
+- No existe inicio de sesión real. Para cuentas necesitarás autenticación gestionada
+  por backend, y para pagos una pasarela legítima con verificación del servidor.
+- GitHub Pages aloja archivos estáticos; no es por sí solo un servicio de backend.
+- Los precios publicados son ejemplos: NO son ofertas de venta vinculantes.
