@@ -1,0 +1,8 @@
+SOLUCAR MAS — V14
+
+- INDEX: camión accidentado incorporado dentro de index.html. No depende de subir una foto aparte.
+- Tema claro: blanco, azul corporativo y azul marino. Tema oscuro: fondo oscuro, acentos rojos. Se conserva el rojo del logo en ambos temas.
+- Sube todos los archivos del ZIP a la raíz del repositorio, incluyendo tema-v14.css, y reemplaza los antiguos.
+- Este cambio NO modifica la función Supabase de correos: no vuelvas a desplegarla para el tema visual.
+- Si solo reemplazas index.html sin tema-v14.css, no cambiarán correctamente los colores.
+- Para probar cambios abre index.html?ver=14 y usa Ctrl+F5.

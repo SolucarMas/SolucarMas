@@ -1,0 +1,19 @@
+/* SOLUCAR MAS V14: Azul corporativo de dia y rojo firme de noche. */
+:root { --blue:#1266e8!important; --blue2:#247bf0!important; --solucar-accent:#1266e8; --solucar-accent-hover:#0853c9; }
+html[data-theme="dark"] { --blue:#f04452!important; --blue2:#ff5867!important; --solucar-accent:#e62539; --solucar-accent-hover:#f04452; }
+/* Botones: ambos temas usan un acento de marca UNICO, sin mezclar degradados. */
+.button-primary,.btn-primary,.button.button-primary { background:var(--solucar-accent)!important; border-color:var(--solucar-accent)!important; color:#fff!important; box-shadow:0 11px 26px rgba(8,42,89,.16)!important; }
+.button-primary:hover,.btn-primary:hover { background:var(--solucar-accent-hover)!important; border-color:var(--solucar-accent-hover)!important; }
+/* Titulos y detalles, no mezclar rojo con azul en el mismo tema. */
+.text-gradient{background:none!important;-webkit-background-clip:initial!important;background-clip:initial!important;color:var(--solucar-accent)!important;-webkit-text-fill-color:currentColor!important;}
+.blue-text,.eyebrow,.section-kicker,.payment-symbol,.product-category,.product-card .product-category,.auth-eyebrow,.section-kicker,.store-eyebrow {color:var(--solucar-accent)!important;}
+.main-nav a.active,.product-filters button[aria-pressed="true"],.filter-button[aria-pressed="true"],.category-button[aria-pressed="true"]{color:var(--solucar-accent)!important;}
+#quoteForm .plate-highlight,.plate-highlight {border-color:var(--solucar-accent)!important;background:rgba(18,102,232,.055)!important;}
+html[data-theme="dark"] #quoteForm .plate-highlight,html[data-theme="dark"] .plate-highlight {background:rgba(230,37,57,.09)!important;}
+#quoteForm .plate-highlight input {border-color:var(--solucar-accent)!important;}
+html[data-theme="dark"] .button-primary,html[data-theme="dark"] .btn-primary{box-shadow:0 12px 28px rgba(200,30,48,.22)!important;}
+/* Preserve natural reds present in the official logo; decorative red accents
+   from earlier versions no longer dominate light mode. */
+html:not([data-theme="dark"]) .product-card:hover,html:not([data-theme="dark"]) .service-card:hover{border-color:rgba(18,102,232,.3)!important;}
+/* Image stability on mobile and desktop. */
+.feature-banner .banner-photo img{display:block!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:center!important;}
