@@ -14,3 +14,11 @@
 /* V9 — Pago independiente con acentos corporativos */
 .pay-option:has(input:checked){border-color:var(--blue)!important}
 .pay-num{color:var(--blue)!important}
+
+
+/* SOLUCAR MÁS V10 — pantalla de pago estilo industrial */
+.pay-card,.pay-option{border-radius:11px!important}
+.step{border-radius:7px!important;background:var(--surface2)!important}
+.step.current{background:#c8102e!important;color:white!important;border-color:#c8102e!important}
+.pay-option:has(input:checked){border-color:#c8102e!important;background:var(--surface2)!important}
+.pay-num,.payment-back{color:var(--blue2)!important}

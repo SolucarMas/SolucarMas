@@ -130,3 +130,74 @@ html[data-theme="dark"] .main-nav a.active,html[data-theme="dark"] .filter-btn.a
 /* Mantener botones secundarios e íconos legibles */
 .icon-button:hover,.button-outline:hover{border-color:var(--blue2)!important}
 :focus-visible{outline-color:#cb1938}
+
+
+/* SOLUCAR MÁS V10 — ESTÉTICA INDUSTRIAL / ROJO INTENSO / GRIS ACERO.
+   Esta hoja se carga al final y sobreescribe V8/V9, sin tocar scripts. */
+:root{
+ --page:#f1f3f6; --surface:#ffffff; --surface2:#e6eaf0;
+ --ink:#111b29; --muted:#536170; --line:#ced5df; --nav:#ffffff;
+ --blue:#c8102e; --blue2:#d5152b; --shadow:0 13px 34px rgba(10,22,37,.09);
+ --radius:12px;
+}
+html[data-theme="dark"]{
+ --page:#0b121b; --surface:#17212d; --surface2:#202d3b;
+ --ink:#f4f6f8; --muted:#acbac9; --line:#354659; --nav:#111b27;
+ --blue:#f02b44; --blue2:#ff4356; --shadow:0 15px 35px #0006;
+}
+body{background:var(--page)!important;color:var(--ink)}
+.site-top{background:#0a1624!important;color:#e6ebf2}
+.site-header{background:var(--nav)!important;border-bottom:3px solid #b81027!important;box-shadow:0 7px 25px #0a162412}
+.main-nav a{border-radius:7px!important}
+.main-nav a.active,.filter-chip[aria-pressed="true"],.filter-chip.active,
+.filter-btn.active,.category-pill.active,.category-tab.active{
+ background:#bd122b!important;color:#fff!important;border-color:#bd122b!important;
+ box-shadow:0 4px 14px #ba13272b!important
+}
+html[data-theme="dark"] .main-nav a.active,
+html[data-theme="dark"] .filter-chip[aria-pressed="true"],
+html[data-theme="dark"] .filter-btn.active{background:#c8102e!important;color:#fff!important}
+.main-nav a:not(.active):hover{background:var(--surface2)!important}
+.icon-button{border-radius:8px!important}
+.icon-button:hover{color:#c8102e!important;border-color:#c8102e!important}
+.scroll-meter{background:#d71931!important}
+.hero{background:#07111d!important}
+.hero::after{background:linear-gradient(90deg,rgba(5,13,23,.96) 0%,rgba(6,16,29,.9) 45%,rgba(6,16,29,.32) 100%)!important}
+.hero .text-gradient,.text-gradient{
+ background:linear-gradient(115deg,#f73748 5%,#da142b 95%)!important;
+ -webkit-background-clip:text!important;background-clip:text!important;color:transparent!important;
+}
+.blue-text,.eyebrow,.section-kicker,.auth-eyebrow{color:#be142c!important}
+html[data-theme="dark"] .blue-text,html[data-theme="dark"] .eyebrow{color:#ff4c60!important}
+.eyebrow::before{background:#d31630!important}
+.tag{background:#191f28!important;border-color:#e2384a!important;color:#fff!important}
+.tag .dot{background:#eb203a!important;box-shadow:0 0 13px #e01d3e!important}
+.button,.btn,.button-primary,.add-cart-button,.button-submit{border-radius:8px!important}
+.button-primary,.add-cart-button,.button-submit{
+ background:#c8102e!important;border:1px solid #a40d24!important;color:white!important;
+ box-shadow:0 8px 21px #a3102c35!important
+}
+.button-primary:hover,.add-cart-button:hover,.button-submit:hover{background:#a60924!important;box-shadow:0 10px 24px #a3102c40!important}
+.button-outline{border-color:#aeb8c4!important}
+.section-soft,.intro-strip{background:var(--surface2)!important}
+.service-card,.product-card,.quote-card,.info-card,.feature-card,.process-card{
+ border-radius:11px!important;border-color:var(--line)!important;box-shadow:0 6px 22px #0c19250b
+}
+.service-card:hover,.product-card:hover{border-color:#c8102e!important}
+.product-card .product-image{background:#fff!important;border-bottom:1px solid #dee3eb}
+.product-card .product-image>.product-label{background:#fff!important;color:#a60e26!important;border:1px solid #d7dce5}
+.filter-chip{border-radius:8px!important;background:var(--surface)!important;color:var(--ink)!important}
+.filter-chip[aria-pressed="true"],.filter-chip.active{background:#bd122b!important;color:white!important}
+.quote-card .field input,.quote-card .field select,.quote-card .field textarea,
+input,select,textarea{border-radius:8px}
+.quote-form-v6 .plate-highlight,#quoteForm .plate-highlight,.plate-highlight{
+ border:2px solid #bf122d!important;border-left:5px solid #bf122d!important;
+ background:var(--surface2)!important;border-radius:9px!important
+}
+.quote-form-v6 .plate-highlight input{border-color:#ac1129!important}
+html[data-theme="dark"] .quote-form-v6 .plate-highlight,
+html[data-theme="dark"] #quoteForm .plate-highlight{background:#233142!important}
+.footer{background:#091522!important}
+.footer a:hover{color:#ff4c60}
+:focus-visible{outline:3px solid #d71936!important;outline-offset:3px}
+@media(max-width:760px){.header-inner{gap:10px}.hero{min-height:590px}}

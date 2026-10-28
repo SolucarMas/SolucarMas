@@ -28,3 +28,32 @@ html[data-theme="dark"]{--blue:#ff7d93;--hover:#ffa0af;--soft:#3b2434;--faint:#4
 .auth-eyebrow,.section-kicker{color:var(--blue)!important}
 .auth-tabs .selected{color:var(--blue)!important}
 .field input:focus{border-color:var(--blue)!important;box-shadow:0 0 0 3px #de35522a!important}
+
+
+/* SOLUCAR MÁS V10 — zona de clientes sin tonos rosa pastel */
+:root{
+ --bg:#f1f3f6;--card:#fff;--ink:#121d2b;--muted:#576676;
+ --line:#ced5df;--blue:#c8102e;--hover:#a50926;--soft:#e8ecf1;
+ --shell:#fff;--subtle:#f4f6f8;--faint:#dce2e9;--shadow:0 15px 38px #0d1c2a17;
+}
+html[data-theme="dark"]{
+ --bg:#0b121b;--card:#17212e;--ink:#f5f6f8;--muted:#aebcce;
+ --line:#344658;--blue:#ff4055;--hover:#ee2941;--soft:#263443;
+ --shell:#111b27;--subtle:#202e3d;--faint:#344556;--shadow:0 22px 45px #0006;
+}
+.auth-header{border-bottom:3px solid #c8102e!important}
+.auth-scene{background:var(--bg)!important}
+.auth-login-card,.account-card,.dashboard-card,.panel-card{border-radius:12px!important}
+.auth-tabs{border-radius:9px!important}
+.auth-tabs button{border-radius:7px!important}
+.auth-tabs .selected{background:#c8102e!important;color:white!important;box-shadow:0 4px 12px #9c162935!important}
+.btn,.btn-primary{border-radius:8px!important}
+.btn-primary{background:#c8102e!important;color:#fff!important;box-shadow:0 9px 20px #a50b2940!important}
+.btn-primary:hover{background:#a50b24!important}
+.brand-feature{background:linear-gradient(125deg,#091522,#1c2b3c)!important;border-color:#485b6d!important;border-radius:12px!important;border-left:4px solid #d31530!important}
+.brand-feature span{color:#ff4d63!important}
+.dashboard-menu{background:#0e1b2a!important;border-radius:11px!important;border-top:3px solid #c8102e}
+.field input{border-radius:8px!important}
+.field input:focus{border-color:#c8102e!important;box-shadow:0 0 0 3px #c8102e26!important}
+.auth-eyebrow,.section-kicker{color:var(--blue)!important}
+:focus-visible{outline:3px solid #c8102e!important;outline-offset:2px}

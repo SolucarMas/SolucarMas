@@ -1,0 +1,23 @@
+SOLUCAR MÁS — V10 / ESTÉTICA INDUSTRIAL
+
+PALETA:
+Rojo fuerte #C8102E | Azul marino casi negro #091522 | Blanco #FFFFFF | Gris acero #E6EAF0
+Sin fondos rosados, botones pastel ni sombras rosadas.
+
+CAMBIOS:
+- Inicio: hero oscuro, títulos rojos intensos, botones sólidos.
+- Tienda: productos sobre blanco y gris metálico, categorías activas rojo fuerte.
+- Cotización: patente destacada, colores y campos sobrios.
+- Mi cuenta y pago: misma identidad, con modo oscuro conservado.
+- No se alteraron precios, productos, imágenes, registros, lógica de pagos ni funciones de Supabase.
+
+PUBLICAR:
+1. Descomprime el ZIP.
+2. Sube TODO su contenido a la RAÍZ del repositorio que publica solucarmas.cl.
+   Reemplaza los archivos existentes del mismo nombre (no subir una carpeta externa).
+3. Conserva CNAME y assets/ y confirma con Commit changes.
+4. En Actions, verifica que GitHub Pages haya terminado el despliegue.
+5. Comprueba https://solucarmas.cl/tienda.html?ver=10 con Ctrl+F5.
+6. Si siguen los colores viejos, pulsa Ctrl+U y busca solucar-industrial-v10: si no aparece, el HTML publicado aún es antiguo.
+
+NOTA: El envío real de cotizaciones depende de que la Edge Function enviar-cotizacion esté publicada y Resend esté configurado en Supabase. Cambiar estilos no soluciona esa conexión.
