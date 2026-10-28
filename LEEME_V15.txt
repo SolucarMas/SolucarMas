@@ -1,0 +1,21 @@
+SOLUCAR MÁS — VERSIÓN 15 — 28 OCT 2026
+
+CAMBIOS
+- Menú activo en modo claro: fondo azul suave y letras azules, no rojas.
+- Menú activo en modo oscuro: fondo oscuro y letras rojas.
+- Foto en "La solución empieza con tu necesidad": Peugeot Partner blanca accidentada, integrada dentro del HTML (no depende de URL externa).
+- Se mantiene el camión en el banner de tienda y el resto de las imágenes.
+- Al CONFIRMARSE la cotización desde Supabase (HTTP correcto y ok:true), aparece "¡Tu cotización ha sido enviada!" en un panel destacado con número de solicitud.
+- Página de pago explica transferencia y tarjeta sin dar a entender que la tarjeta está habilitada. No se procesan pagos ni se solicitan datos de tarjetas.
+
+PARA INSTALAR
+1. Conserva una copia de la versión previa en GitHub.
+2. Sube todo el contenido del ZIP a la raíz del repositorio, incluyendo tema-v15.css.
+3. No borres CNAME.
+4. Confirma cambios y espera la publicación de GitHub Pages.
+5. Abre solucarmas.cl/?v=15 y comprueba los dos temas.
+6. Haz una cotización real de prueba y verifica que el panel verde solo aparece cuando el servidor la acepta.
+
+NO SE MODIFICA SUPABASE: la función que ya envía correos continúa intacta.
+
+TARJETAS: no hay pasarela instalada, por lo que los botones sirven para registrar preferencia solamente. Para cobrar con tarjetas: abrir cuenta mercantil, configurar backend seguro, Webpay/Flow u otro proveedor, validar notificaciones, registrar pedidos y conciliar pagos. No recolectar datos de tarjetas en GitHub Pages.
