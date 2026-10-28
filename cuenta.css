@@ -19,3 +19,12 @@
 .brand-feature{background:linear-gradient(125deg,#2a1224,#6d1b32);border-color:#a63d55}
 .brand-feature span{color:#ffc5cf}
 .auth-tabs .selected{color:var(--blue)}
+
+
+/* V9 — Refuerzo blanco / rojo */
+:root{--blue:#d01b3b;--hover:#ed3956;--soft:#fff0f3;--faint:#ffe4e9}
+html[data-theme="dark"]{--blue:#ff7d93;--hover:#ffa0af;--soft:#3b2434;--faint:#432938}
+.btn-primary{background:linear-gradient(110deg,#b81030,#ed3654)!important;color:#fff!important}
+.auth-eyebrow,.section-kicker{color:var(--blue)!important}
+.auth-tabs .selected{color:var(--blue)!important}
+.field input:focus{border-color:var(--blue)!important;box-shadow:0 0 0 3px #de35522a!important}

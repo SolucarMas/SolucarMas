@@ -1,0 +1,19 @@
+SOLUCAR MÁS — V9 ROJO / BLANCO
+
+CORRECCIÓN DEL PROBLEMA "SIGUEN LOS MISMOS COLORES"
+La versión V8 incluía CSS rojo, pero sus archivos HTML seguían solicitando styles.css?v=20261028v7.
+Esta versión cambia las referencias a ?v=solucar-rojo-v9 e INCORPORA los estilos directamente dentro de index.html, tienda.html, cuenta.html y pago.html.
+De esta manera, aun si el navegador conserva una hoja CSS antigua, los estilos V9 se aplican al HTML nuevo.
+
+PUBLICAR EN GITHUB
+1. Descomprime el ZIP.
+2. Abre el repositorio GitHub de solucarmas.cl, rama main.
+3. Add file > Upload files. Arrastra TODO el contenido del ZIP (no la carpeta contenedora).
+4. Baja y pulsa Commit changes.
+5. En Settings > Pages revisa que la rama publicadora sea main / (root) o tu configuración anterior.
+6. Espera a que el despliegue figure como terminado en Actions.
+7. Abre https://solucarmas.cl/tienda.html?ver=9 en pestaña privada y confirma botones ROJOS.
+8. Si ves colores azules, View Source (Ctrl+U) y busca "solucar-brand-v9". Si no aparece, GitHub todavía sirve el HTML antiguo o se publicó otra rama/repo.
+
+NO ES NECESARIO borrar el repositorio ni tocar Supabase para cambiar colores.
+No se modificó la lógica de correo, registro ni carrito.

@@ -111,3 +111,22 @@ html[data-theme=dark] .site-header .main-nav a.active{background:#462532;color:#
 .plate-highlight{border-color:#f29aa6;background:#fff5f6}
 html[data-theme=dark] .plate-highlight{background:#3c2430;border-color:#ad4e64}
 :focus-visible{outline-color:#d92140}
+
+
+/* V9 — Identidad corporativa visible. Mantener la navegación y funcionalidades. */
+:root{--blue:#c81736;--blue2:#e52a48;--page:#fff9fa;--surface2:#fff0f2;--line:#eddce2}
+html[data-theme="dark"]{--blue:#ff7187;--blue2:#ff889b;--page:#110f18;--surface2:#34232e;--line:#47313c}
+/* Acciones de compra y cotización */
+.button-primary,.add-cart-button,.button-submit{background:linear-gradient(115deg,#bd102f,#e62c49)!important;border-color:#c81736!important;color:#fff!important}
+.button-primary:hover{background:linear-gradient(115deg,#9c0d27,#ce1839)!important}
+/* Elementos de navegación y categorías activas */
+.main-nav a.active,.filter-btn.active,.category-pill.active,.category-tab.active{background:#ffe8ed!important;color:#b4102f!important}
+html[data-theme="dark"] .main-nav a.active,html[data-theme="dark"] .filter-btn.active{background:#492330!important;color:#ff8da0!important}
+.blue-text,.eyebrow,.section-kicker{color:var(--blue2)!important}
+.text-gradient{background:linear-gradient(108deg,#ffb6c2,#fa3a5d)!important;-webkit-background-clip:text!important;background-clip:text!important;color:transparent!important}
+.scroll-meter{background:linear-gradient(90deg,#b30e2d,#ee4360)!important}
+.product-card:hover{border-color:#d34b63}
+.product-image>.product-label{color:#b4102f!important}
+/* Mantener botones secundarios e íconos legibles */
+.icon-button:hover,.button-outline:hover{border-color:var(--blue2)!important}
+:focus-visible{outline-color:#cb1938}
