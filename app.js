@@ -70,7 +70,7 @@ if(quote)quote.addEventListener('submit',async e=>{
      const defaultMsg=response.status===404?'La función enviar-cotizacion no está publicada en Supabase.':response.status===401||response.status===403?'La función está bloqueada por la configuración de autenticación (Verify JWT).':response.status===503?'Falta configurar Resend en las variables secretas de Supabase.':'El servidor no confirmó el envío (HTTP '+response.status+').';
      throw new Error(typeof result.error==='string'?result.error:defaultMsg);
    }
-   status.textContent='¡Cotización recibida! Tu número de solicitud es '+(result.reference||'confirmado')+'. Te contactaremos al correo indicado.';
+   status.textContent='¡Cotización recibida! Tu número de solicitud es '+(result.reference||'confirmado')+'. '+(result.customer_email_sent===true?'También enviamos una confirmación a tu correo.': 'Revisaremos tu solicitud y te contactaremos al correo indicado.');
    status.classList.add('is-success');quote.reset();
  }catch(err){
    status.classList.add('is-error');

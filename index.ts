@@ -63,6 +63,25 @@ Deno.serve(async(req)=>{
   try{
     const response=await fetch('https://api.resend.com/emails',{method:'POST',headers:{Authorization:`Bearer ${apiKey}`,'Content-Type':'application/json'},body:JSON.stringify(mail)});
     if(!response.ok){console.error('Resend error:',response.status,await response.text());return json({ok:false,error:'El servicio de correo rechazó la solicitud. Inténtalo más tarde.'},502,cors)}
-    return json({ok:true,reference},200,cors);
+    // Confirmación independiente al cliente: solo después de que Resend acepte el correo interno.
+    // Si el mensaje al cliente falla, la cotización sigue recibida y se registra el fallo.
+    let customer_email_sent=false;
+    try {
+      const firstName=htmlEscape(data.nombre.split(/\s+/)[0]||'');
+      const confirmation={
+        from,
+        to:[data.correo],
+        reply_to:'contacto@solucarmas.cl',
+        subject:`SOLUCAR MÁS | Tu solicitud ha sido confirmada · ${reference}`,
+        html:`<!doctype html><html lang="es"><head><meta charset="utf-8"></head><body style="margin:0;background:#f1f4f8;font-family:Arial,Helvetica,sans-serif;color:#0d2036"><table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:#f1f4f8;padding:30px 12px"><tr><td align="center"><table width="580" role="presentation" cellpadding="0" cellspacing="0" style="max-width:580px;width:100%;border-collapse:collapse;background:#fff;border-radius:14px;overflow:hidden"><tr><td style="background:#091b30;padding:26px 30px;color:#fff;font-size:24px;font-weight:800">SOLUCAR <span style="color:#ec283b">MÁS</span><div style="font-size:11px;letter-spacing:1.4px;color:#c9d6e5;padding-top:6px">SOLUCIONES AUTOMOTRICES</div></td></tr><tr><td style="padding:34px 30px"><div style="color:#1671d1;font-size:12px;font-weight:800;letter-spacing:1px">SOLICITUD RECIBIDA</div><h1 style="font-size:28px;line-height:1.2;color:#10233c;margin:14px 0 16px">Tu solicitud ha sido confirmada.</h1><p style="font-size:16px;line-height:1.7">Hola ${firstName},</p><p style="line-height:1.7;color:#4b5c70">Recibimos correctamente tu solicitud de cotización. Nuestro equipo revisará la información de tu vehículo y los repuestos o insumos que necesitas para responderte a la brevedad.</p><table width="100%" cellpadding="12" cellspacing="0" role="presentation" style="background:#f3f6fa;border-radius:10px;margin:24px 0"><tr><td style="font-size:13px;color:#52657a">Número de solicitud</td><td style="font-size:14px;font-weight:bold;text-align:right;color:#142b48">${htmlEscape(reference)}</td></tr><tr><td style="font-size:13px;color:#52657a">Patente</td><td style="font-size:14px;font-weight:bold;text-align:right;color:#142b48">${htmlEscape(data.patente)}</td></tr></table><p style="line-height:1.7;color:#4b5c70">Esta confirmación acredita la recepción de la solicitud, <strong>no la disponibilidad ni el precio final</strong> de los productos.</p><p style="line-height:1.7;color:#4b5c70">¿Necesitas complementar tu solicitud? Escríbenos a <a href="mailto:contacto@solucarmas.cl" style="color:#145fb5">contacto@solucarmas.cl</a> e indica tu número de solicitud.</p></td></tr><tr><td style="background:#091b30;color:#d6e2ef;text-align:center;font-size:12px;padding:20px">SOLUCAR MÁS · Soluciones automotrices · <a href="https://solucarmas.cl" style="color:#fff">solucarmas.cl</a></td></tr></table></td></tr></table></body></html>`,
+        text:`Tu solicitud ha sido confirmada.\n\nHola ${data.nombre},\nRecibimos correctamente tu solicitud de cotización. Nuestro equipo revisará los datos y te responderá a la brevedad.\n\nN° de solicitud: ${reference}\nPatente: ${data.patente}\n\nLa recepción no implica confirmación de precios o disponibilidad.\nContacto: contacto@solucarmas.cl`
+      };
+      const clientResponse=await fetch('https://api.resend.com/emails',{
+        method:'POST',headers:{Authorization:`Bearer ${apiKey}`,'Content-Type':'application/json'},body:JSON.stringify(confirmation)
+      });
+      customer_email_sent=clientResponse.ok;
+      if(!customer_email_sent)console.error('Confirmación cliente rechazada:',clientResponse.status,await clientResponse.text());
+    }catch(customerError){console.error('No se pudo enviar confirmación al cliente:',customerError)}
+    return json({ok:true,reference,customer_email_sent},200,cors);
   }catch(error){console.error('Error de envío:',error);return json({ok:false,error:'No fue posible conectar con el servicio de correo.'},502,cors)}
 });

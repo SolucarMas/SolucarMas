@@ -1,0 +1,14 @@
+SOLUCAR MÁS V13 · CONFIRMACIÓN DE COTIZACIONES Y CAMIÓN ACCIDENTADO
+
+PASO 1. GITHUB PAGES
+Subir todos los archivos de este ZIP a la RAÍZ del repositorio, reemplazando los archivos anteriores y manteniendo CNAME. La foto del camión se ubica en assets/camion-accidentado.jpg. La hoja tema-v13.css recupera el esquema azul/blanco anterior. Comprobar que https://solucarmas.cl/assets/camion-accidentado.jpg carga.
+
+PASO 2. SUPABASE (OBLIGATORIO PARA CORREO AL CLIENTE)
+Edge Functions > enviar-cotizacion > Code > Edit / Deploy new version. Reemplazar el contenido de index.ts con el archivo supabase/functions/enviar-cotizacion/index.ts de este paquete. NO PEGARLO EN SQL EDITOR. Publicar/deploy y conservar Verify JWT desactivado conforme a la configuración actual.
+Los secretos RESEND_API_KEY y QUOTE_FROM_EMAIL ya configurados siguen en uso. No se crean nuevos.
+
+PASO 3. PRUEBA
+Enviar cotización desde https://solucarmas.cl/#cotizar con correo propio. Comprobar correo interno (con CSV) y confirmación al correo del cliente; revisar spam y logs de Resend. La función ahora devuelve customer_email_sent true o false. Si el envío interno funciona pero falla la confirmación, el cliente sigue viendo que la solicitud fue recibida.
+
+IMPORTANTE
+No alteres cuentas bancarias ni panel de pagos con esta actualización. Sin despliegue de Edge Function, NO se enviará el correo de confirmación al cliente. Las fotos de accidentes son ilustrativas. Evitar afirmar que el envío de confirmación está activo antes de una prueba real.

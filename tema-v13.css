@@ -1,0 +1,11 @@
+
+/* V13 · Regreso a colores originales: blanco, azul corporativo y azul marino. */
+:root{--blue:#1266e8!important;--blue2:#2587f5!important;--page:#f6f9fd!important;--surface:#fff!important;--surface2:#eef3fa!important;--nav:#fff!important;--ink:#111f35!important;--muted:#64748b!important;--line:#dce5f0!important}
+html[data-theme="dark"]{--blue:#70adff!important;--blue2:#85baff!important;--page:#080f1c!important;--surface:#101c2d!important;--surface2:#18283f!important;--nav:#0a1524!important;--ink:#f1f6ff!important;--muted:#a0b3cc!important;--line:#253953!important}
+.button-primary,.btn-primary{background:linear-gradient(110deg,#0d61e2,#248bff)!important;box-shadow:0 12px 26px rgba(14,99,229,.24)!important;color:#fff!important}
+.main-nav a.active,.product-filters button[aria-pressed="true"],.filter-button[aria-pressed="true"],.category-button[aria-pressed="true"]{color:#1672ee!important}
+.text-gradient{background:linear-gradient(110deg,#40c7ff,#397bff)!important;-webkit-background-clip:text!important;background-clip:text!important;color:transparent!important}
+.blue-text,.eyebrow,.section-kicker{color:var(--blue2)!important}
+#quoteForm .plate-highlight,.plate-highlight{border-color:#267bea!important;background:rgba(33,121,230,.06)!important}
+#quoteForm .plate-highlight input{border-color:#257deb!important}
+.product-card .product-category,.product-category{color:var(--blue2)!important}
