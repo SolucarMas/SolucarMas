@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="description" content="Confirmación de recepción de cotizaciones en SOLUCAR MÁS.">
+  <title>Cotización recibida | SOLUCAR MÁS</title>
+  <script>
+    (function(){
+      try {
+        const saved=localStorage.getItem('solucar-theme');
+        document.documentElement.dataset.theme=saved==='dark'||saved!=='light'&&matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';
+      }catch(e){document.documentElement.dataset.theme=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';}
+    })();
+  </script>
+  <style>
+    :root{color-scheme:light;--bg:#f4f7fb;--card:#fff;--ink:#101f36;--muted:#53667d;--line:#dde5ee;--accent:#1266e8;--accent-hover:#084cb8;--accent-soft:#e9f2ff;--accent-ink:#0755c5;--shadow:0 24px 70px rgba(13,39,78,.10)}
+    html[data-theme="dark"]{color-scheme:dark;--bg:#081321;--card:#142136;--ink:#f1f6ff;--muted:#b3c5d8;--line:#2a4059;--accent:#e33549;--accent-hover:#ff5265;--accent-soft:#382432;--accent-ink:#ff7080;--shadow:0 26px 70px rgba(0,0,0,.27)}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100dvh;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;display:flex;flex-direction:column}
+    .shell{width:min(1120px,calc(100% - 36px));margin:0 auto}
+    header{border-bottom:1px solid var(--line);background:var(--card)}
+    .brand{display:inline-flex;align-items:center;min-height:94px}
+    .brand img{display:block;width:185px;max-width:58vw;height:78px;object-fit:contain}
+    .logo-dark{display:none}html[data-theme="dark"] .logo-light{display:none}html[data-theme="dark"] .logo-dark{display:block}
+    main{width:min(760px,calc(100% - 32px));margin:auto;flex:1;display:grid;place-items:center;padding:38px 0 76px}
+    .panel{background:var(--card);border:1px solid var(--line);border-radius:25px;box-shadow:var(--shadow);padding:clamp(28px,6vw,66px) clamp(22px,5vw,55px);width:100%;text-align:center}
+    .symbol{width:86px;height:86px;display:grid;place-items:center;margin:0 auto 27px;background:var(--accent-soft);color:var(--accent);border-radius:50%}
+    .symbol svg{width:47px;height:47px}
+    h1{font-size:clamp(2rem,5vw,3.55rem);font-weight:850;letter-spacing:-.052em;line-height:1.13;margin:0 auto 23px;max-width:650px}
+    .lead{color:var(--muted);line-height:1.7;font-size:clamp(1rem,2vw,1.16rem);max-width:560px;margin:0 auto 22px}
+    .reference{display:inline-flex;align-items:center;gap:9px;margin:3px auto 29px;padding:13px 19px;background:var(--accent-soft);border-radius:11px;color:var(--ink);font-weight:750;font-size:.94rem;max-width:100%;overflow-wrap:anywhere}
+    .reference strong{color:var(--accent-ink)}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-width:224px;min-height:55px;padding:14px 27px;background:var(--accent);color:white;font-size:1rem;font-weight:800;border-radius:11px;text-decoration:none;transition:background .2s,transform .2s}
+    .btn:hover{background:var(--accent-hover);transform:translateY(-1px)}
+    .muted{font-size:.82rem;color:var(--muted);margin:19px 0 0}
+    .spinner{height:39px;width:39px;border-radius:50%;border:4px solid var(--accent-soft);border-top-color:var(--accent);animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    footer{padding:19px 15px;text-align:center;border-top:1px solid var(--line);color:var(--muted);font-size:.79rem}
+    @media(max-width:520px){.brand{min-height:75px}.brand img{height:65px;width:155px}.panel{border-radius:18px}.symbol{height:72px;width:72px}.symbol svg{width:39px;height:39px}.btn{width:100%}}
+    [hidden]{display:none!important}
+  </style>
+</head>
+<body>
+  <header><div class="shell"><a class="brand" href="index.html" aria-label="Ir al inicio de SOLUCAR MÁS"><img src="assets/logo-claro.png" class="logo-light" alt="SOLUCAR MÁS"><img src="assets/logo-oscuro.png" class="logo-dark" alt="SOLUCAR MÁS"></a></div></header>
+  <main>
+    <section class="panel" aria-live="polite">
+      <div class="symbol" aria-hidden="true" id="symbol"><span class="spinner"></span></div>
+      <h1 id="heading">Estamos enviando tu cotización…</h1>
+      <p class="lead" id="message">Estamos comprobando la recepción de tu solicitud. No cierres esta pestaña todavía.</p>
+      <p id="reference" class="reference" hidden></p>
+      <a href="index.html" class="btn" id="backHome" hidden>Volver al inicio <span aria-hidden="true">→</span></a>
+      <p class="muted" id="note">La confirmación aparecerá cuando el servidor responda correctamente.</p>
+    </section>
+  </main>
+  <footer>© SOLUCAR MÁS · Soluciones automotrices</footer>
+  <script>
+    (function(){
+      'use strict';
+      const receiptKey='solucar-cotizacion-recibida-v16';
+      const heading=document.getElementById('heading');
+      const message=document.getElementById('message');
+      const reference=document.getElementById('reference');
+      const symbol=document.getElementById('symbol');
+      const home=document.getElementById('backHome');
+      const note=document.getElementById('note');
+      const check='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m7 12 3.4 3.4L17 8.8"/></svg>';
+      function render(){
+        if(location.hash!=='#recibida'){
+          if(!window.opener){
+            heading.textContent='Consulta el estado de tu cotización';
+            message.textContent='Esta pantalla aparece automáticamente después de que SOLUCAR MÁS confirma la recepción de una solicitud.';
+            symbol.textContent='i';
+            home.hidden=false;
+            note.hidden=true;
+          }
+          return;
+        }
+        let receipt;
+        try{receipt=JSON.parse(sessionStorage.getItem(receiptKey)||'null')}catch{}
+        const valid=receipt && typeof receipt.createdAt==='number' && Date.now()-receipt.createdAt<1800000 && typeof receipt.reference==='string';
+        if(!valid){
+          heading.textContent='No encontramos una cotización confirmada';
+          message.textContent='Vuelve al formulario y envía tu solicitud. Esta pantalla solo confirma los envíos aceptados por nuestro servidor.';
+          symbol.textContent='!';home.hidden=false;note.hidden=true;
+          return;
+        }
+        heading.textContent='Tu cotización ha sido recibida';
+        message.textContent='¡Gracias por confiar en SOLUCAR MÁS! Recibimos correctamente tu solicitud y revisaremos los datos para responderte al correo que proporcionaste.';
+        symbol.innerHTML=check;
+        if(receipt.reference){reference.hidden=false;reference.replaceChildren();const name=document.createElement('span');name.textContent='Número de solicitud:';const value=document.createElement('strong');value.textContent=receipt.reference;reference.append(name,value)}
+        home.hidden=false;
+        note.textContent='Este mensaje confirma la recepción de tu solicitud, no el precio ni la disponibilidad de los repuestos.';
+      }
+      window.addEventListener('hashchange',render);
+      window.addEventListener('pageshow',render);
+      render();
+    })();
+  </script>
+</body>
+</html>

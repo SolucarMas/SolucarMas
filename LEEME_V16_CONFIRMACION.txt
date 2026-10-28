@@ -1,0 +1,24 @@
+SOLUCAR MÁS — V16 / CONFIRMACIÓN DE COTIZACIONES EN NUEVA PESTAÑA
+==================================================================
+
+QUÉ CAMBIA
+- Al pulsar "Enviar mi cotización", se abre una pestaña con un estado de envío.
+- La pestaña muestra "Tu cotización ha sido recibida" en grande y al centro SOLO cuando Supabase confirma que recibió la cotización.
+- Incluye el número de solicitud, cuando existe, y el botón "Volver al inicio".
+- Si el envío falla, el formulario muestra el error y se cierra la pestaña auxiliar.
+- Si el navegador bloquea la pestaña, la confirmación se abre en la pestaña actual tras el envío exitoso.
+- La pantalla respeta el modo claro u oscuro del equipo, o la preferencia manual guardada.
+
+INSTALACIÓN MÁS FÁCIL (solo dos archivos)
+1. En GitHub, abre el repositorio que publica solucarmas.cl.
+2. Reemplaza app.js por el nuevo app.js.
+3. Añade cotizacion-recibida.html a la RAÍZ, al lado de index.html.
+4. Confirma los cambios (Commit changes) y espera que GitHub Pages publique.
+5. Prueba una cotización real desde https://solucarmas.cl/#cotizar.
+
+NO necesitas tocar Supabase, Resend, la base de datos ni las plantillas de correo.
+No se muestra una confirmación positiva si la función devuelve un error.
+
+NOTA
+El navegador puede impedir pestañas emergentes. El sistema intenta abrirla con el clic de enviar; en caso de bloqueo, redirige a la página de confirmación en la pestaña actual DESPUÉS del éxito.
+La página de confirmación es un recibo visual; la confirmación definitiva del envío se obtiene de la respuesta exitosa de Supabase. No representa un pago ni una cotización con precio aprobado.

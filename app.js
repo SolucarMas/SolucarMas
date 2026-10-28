@@ -56,6 +56,11 @@ if(quote)quote.addEventListener('submit',async e=>{
  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.correo)){
    status.textContent='Revisa el correo electrónico.';status.classList.add('is-error');return;
  }
+ // Abrir la pestaña desde el gesto del usuario evita bloqueos de ventanas emergentes.
+ // La pestaña solo mostrará la confirmación tras una respuesta exitosa de Supabase.
+ const confirmationUrl=new URL('cotizacion-recibida.html',location.href);
+ let confirmationTab=null;
+ try{confirmationTab=window.open(confirmationUrl.href,'_blank');}catch{}
  submit.disabled=true;status.textContent='Estamos enviando tu solicitud…';
  let timer;
  try{
@@ -70,9 +75,32 @@ if(quote)quote.addEventListener('submit',async e=>{
      const defaultMsg=response.status===404?'La función enviar-cotizacion no está publicada en Supabase.':response.status===401||response.status===403?'La función está bloqueada por la configuración de autenticación (Verify JWT).':response.status===503?'Falta configurar Resend en las variables secretas de Supabase.':'El servidor no confirmó el envío (HTTP '+response.status+').';
      throw new Error(typeof result.error==='string'?result.error:defaultMsg);
    }
-   status.textContent='¡Tu cotización ha sido enviada! Número de solicitud: '+(result.reference||'confirmado')+'. '+(result.customer_email_sent===true?'Te enviamos una confirmación al correo que ingresaste.':'Nuestro equipo recibió tu solicitud y te responderá al correo indicado.');
-   status.classList.add('is-success');quote.reset();
+   // Solo se genera un comprobante visual si el backend confirmó la recepción.
+   const receipt={reference:String(result.reference||'').slice(0,60),createdAt:Date.now()};
+   const receiptKey='solucar-cotizacion-recibida-v16';
+   let opened=false;
+   if(confirmationTab && !confirmationTab.closed){
+     try{
+       confirmationTab.sessionStorage.setItem(receiptKey,JSON.stringify(receipt));
+       confirmationTab.location.replace(confirmationUrl.href+'#recibida');
+       confirmationTab.focus();
+       opened=true;
+     }catch(error){console.warn('No se pudo actualizar la pestaña de confirmación:',error);}
+   }
+   status.classList.add('is-success');
+   status.textContent='¡Tu cotización ha sido recibida! '+(opened?'Se abrió la pestaña de confirmación.':'Tu navegador bloqueó la nueva pestaña; puedes abrir la confirmación aquí mismo.');
+   quote.reset();
+   if(!opened){
+     try{
+       sessionStorage.setItem(receiptKey,JSON.stringify(receipt));
+       location.assign(confirmationUrl.href+'#recibida');
+     }catch(error){
+       status.textContent='¡Tu cotización ha sido recibida! Número de solicitud: '+(receipt.reference||'confirmado')+'. No se pudo abrir la pantalla independiente.';
+     }
+   }
  }catch(err){
+   // Ante un error no mostrar jamás la pantalla de cotización recibida.
+   if(confirmationTab && !confirmationTab.closed){try{confirmationTab.close()}catch{}}
    status.classList.add('is-error');
    const msg=err.name==='AbortError'?'Se agotó el tiempo de conexión. Antes de reintentar, comprueba si recibimos la solicitud.':err instanceof TypeError?'No se pudo conectar con el servidor de cotizaciones. Es posible que la función no esté desplegada, tenga un error CORS o que el navegador bloquee la conexión.':'No se pudo enviar: '+(err.message||'Error desconocido');
    status.textContent=msg+' No hemos confirmado el envío. Puedes comunicarte con contacto@solucarmas.cl.';
