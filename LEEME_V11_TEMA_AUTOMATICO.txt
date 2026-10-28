@@ -1,0 +1,18 @@
+SOLUCAR MAS - V11: TEMA AUTOMATICO SEGUN DISPOSITIVO
+
+- En primera visita se usa prefers-color-scheme: dark / light del sistema operativo.
+- Funciona en celular y computador, sin depender del ancho de la pantalla.
+- Si el usuario pulsa el boton de tema, se guarda su preferencia manual en localStorage.
+- Si no existe eleccion manual, cambiar el tema del sistema actualiza el sitio en vivo.
+- El tema se unifica en Inicio, Tienda, Mi Cuenta y Pago.
+- No se modificaron cotizaciones, precios, backend ni imagenes.
+
+INSTALACION: Descomprime el ZIP. En GitHub sube los archivos y carpetas a la raiz del repositorio y reemplaza los existentes. Conserva el archivo CNAME. Tras el despliegue, fuerza recarga (Ctrl+F5).
+
+PRUEBAS:
+1. En una ventana privada visita /index.html en sistema oscuro: debe iniciar oscuro.
+2. Cambia a modo claro del sistema: la pagina abierta debe adaptarse.
+3. Pulsa boton manual de tema y recarga: debe conservar la preferencia manual.
+4. Para volver a la deteccion automatica tras haber elegido manualmente, en la consola del navegador: localStorage.removeItem('solucar-theme'); location.reload();
+
+NOTA: en un navegador donde ya usaste el selector de tema, esa preferencia manual se respeta incluso si el sistema usa otro modo. La pagina mantiene la funcionalidad responsive existente de celular y escritorio.

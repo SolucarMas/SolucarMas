@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html data-theme="light" lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1" name="viewport"/><meta content="Revisa tu pedido y elige cómo prefieres coordinar el pago con SOLUCAR MÁS." name="description"/><title>Revisar pedido y medio de pago | SOLUCAR MÁS</title><link href="assets/logo-claro.png" rel="icon"/><link href="styles.css?v=solucar-industrial-v10" rel="stylesheet"/><link href="pago.css?v=solucar-industrial-v10" rel="stylesheet"/>
+<html data-theme="light" lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1" name="viewport"/><meta content="Revisa tu pedido y elige cómo prefieres coordinar el pago con SOLUCAR MÁS." name="description"/><title>Revisar pedido y medio de pago | SOLUCAR MÁS</title><link href="assets/logo-claro.png" rel="icon"/><link href="styles.css?v=solucar-system-theme-v11" rel="stylesheet"/><link href="pago.css?v=solucar-system-theme-v11" rel="stylesheet"/>
 <!-- SOLUCAR MÁS: diseño corporativo V9; estilos incorporados para evitar caché CSS antigua -->
 <style id="solucar-brand-v9">
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap');
@@ -154,9 +154,19 @@ html[data-theme="dark"] .main-nav a.active,html[data-theme="dark"] .filter-btn.a
 
 </style>
 <meta name="solucar-version" content="v9-rojo-blanco"/>
-<script>try{document.documentElement.dataset.theme=localStorage.getItem('solucar-theme')==='dark'?'dark':'light'}catch(e){}</script><script defer="" src="pago.js?v=solucar-industrial-v10"></script>
+<script id="solucar-device-theme">(function(){
+  const key='solucar-theme';
+  const preference=window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+  function saved(){try{const x=localStorage.getItem(key);return x==='dark'||x==='light'?x:null}catch(e){return null}}
+  function apply(){document.documentElement.dataset.theme=saved()||(preference&&preference.matches?'dark':'light');}
+  apply();
+  if(preference){const change=()=>{if(!saved())apply()};
+    if(preference.addEventListener)preference.addEventListener('change',change);
+    else if(preference.addListener)preference.addListener(change);
+  }
+})();</script><script defer="" src="pago.js?v=solucar-system-theme-v11"></script>
 <!-- SOLUCAR MÁS V10: nuevo tema industrial, con colores fuertes y sin pasteles -->
-<style id="solucar-industrial-v10">
+<style id="solucar-system-theme-v11">
 
 /* SOLUCAR MÁS V10 — ESTÉTICA INDUSTRIAL / ROJO INTENSO / GRIS ACERO.
    Esta hoja se carga al final y sobreescribe V8/V9, sin tocar scripts. */
