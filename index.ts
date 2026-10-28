@@ -7,7 +7,7 @@ const titles = ['Nombre y apellido','Correo electrónico','Teléfono','Tipo de v
 const json=(data:unknown,status=200,origin='https://solucarmas.cl')=>new Response(JSON.stringify(data),{
   status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',
   'Access-Control-Allow-Origin':origin,'Vary':'Origin',
-  'Access-Control-Allow-Headers':'content-type, apikey, authorization, x-client-info',
+  'Access-Control-Allow-Headers':'content-type, apikey, authorization, x-client-info, x-supabase-api-version',
   'Access-Control-Allow-Methods':'POST, OPTIONS'}});
 const htmlEscape=(v:string)=>v.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]||c));
 const safeCSV=(v:string)=>{
@@ -25,6 +25,7 @@ Deno.serve(async(req)=>{
   if(origin&&!allowedOrigins.has(origin))return json({ok:false,error:'Origen no autorizado.'},403,'https://solucarmas.cl');
   const cors=origin||'https://solucarmas.cl';
   if(req.method==='OPTIONS')return json({},200,cors);
+  if(req.method==='GET')return json({ok:true,service:'enviar-cotizacion',configured:Boolean(Deno.env.get('RESEND_API_KEY')&&Deno.env.get('QUOTE_FROM_EMAIL'))},200,cors);
   if(req.method!=='POST')return json({ok:false,error:'Método no permitido.'},405,cors);
   if(Number(req.headers.get('content-length')||0)>16000)return json({ok:false,error:'Solicitud demasiado grande.'},413,cors);
   let input:Record<string,unknown>;

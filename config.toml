@@ -1,0 +1,2 @@
+[functions.enviar-cotizacion]
+verify_jwt = false

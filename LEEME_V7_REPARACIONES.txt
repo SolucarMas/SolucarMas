@@ -1,0 +1,30 @@
+SOLUCAR MÁS - V7 | CORRECCIONES VERIFICABLES
+===============================================
+
+CAMBIOS
+1) La imagen equivocada del automóvil fue sustituida en la sección SOLUCIONES y en la sección de TIENDA de la portada por una imagen ilustrativa de una Peugeot Partner blanca accidentada.
+2) Los 8 productos incluyen fotografías de referencia generadas; están incrustadas en app.js para que NO dependan de la carpeta assets. También se entregan los archivos en assets/foto-*.webp.
+3) Pago: se corrigieron los nombres de productos (antes mostraban una sola letra), con las mismas 8 fotos. Los precios siguen siendo DEMOSTRATIVOS y no representan stock o cotizaciones reales.
+4) El formulario de cotización pide patente, envía los datos por Supabase a la función y distingue entre un envío confirmado y un error. No promete envío si la conexión falla.
+5) Incluye la página diagnostico-cotizaciones.html para verificar si la función responde.
+
+PUBLICAR EN GITHUB PAGES (IMPORTANTE)
+- Elimina versiones antiguas duplicadas en la raíz si las hay y sube TODOS los archivos y carpetas dentro del ZIP, no el ZIP mismo ni su carpeta contenedora.
+- Confirma que el repositorio contenga index.html, tienda.html, app.js, pago.html, pago.js, supabase-config.js, styles.css y CNAME. Los nombres distinguen mayúsculas.
+- Espera a que termine el despliegue de GitHub Actions y luego recarga con Ctrl+F5.
+- Verifica tienda.html: los ocho productos deben tener foto, incluso si se olvidó subir assets.
+- Verifica index.html#soluciones y el banner de tienda: ambos deben mostrar la Peugeot Partner.
+
+ENVÍO DE COTIZACIONES (PASO ADICIONAL EN SUPABASE)
+- GitHub Pages solo sirve HTML/JS. No puede enviar emails seguros ni ocultar la clave privada de Resend.
+- En Supabase → Edge Functions → 'enviar-cotizacion': publica ACTUALIZADO el archivo supabase/functions/enviar-cotizacion/index.ts.
+- Desactiva Verify JWT para esta función pública; configurado también en supabase/config.toml para despliegues con CLI. El código controla origen y campos, pero eso NO sustituye un CAPTCHA y un rate limit al tener tráfico real.
+- En Supabase → Edge Functions → Secrets configura: RESEND_API_KEY (clave PRIVADA de Resend) y QUOTE_FROM_EMAIL (p.ej. SOLUCAR MAS <cotizaciones@solucarmas.cl>).
+- Verifica el dominio solucarmas.cl en Resend y añade SOLO los registros DNS que te indique Resend, sin borrar los registros de GitHub Pages.
+- El correo destinatario fijo es contacto@solucarmas.cl; llegará una tabla HTML y un archivo .csv compatible con Excel, si Resend acepta el envío.
+- Prueba https://solucarmas.cl/diagnostico-cotizaciones.html para comprobar despliegue, después envía UNA cotización de prueba desde la web.
+- Si el diagnóstico arroja error de red/CORS, abre Supabase → Edge Functions → enviar-cotizacion → Logs / Invocations para ver la causa.
+- No compartas RESEND_API_KEY por chat, HTML, GitHub ni capturas.
+
+NO SE HA ENVIADO NINGÚN CORREO REAL NI SE HAN HECHO CAMBIOS A TU PROYECTO PRIVADO DE SUPABASE.
+Los precios actuales (8900, 12900, 29900, 25900, 27900, 6900, 9900 y 7500 CLP) son solo de demostración; actualízalos con tus precios oficiales antes de vender.
