@@ -1,0 +1,14 @@
+SOLUCAR MÁS — V8 BLANCO Y ROJO
+
+Se actualizan los colores globales en styles.css, cuenta.css y pago.css.
+El rojo domina botones, enlaces, títulos destacados, categorías y formularios.
+Modo oscuro mantiene contraste adecuado con detalles rojos.
+Se conserva el logo, la tienda, las imágenes, el carrito, la autenticación y Supabase sin cambios de lógica.
+
+INSTALAR
+1. Descomprime este archivo.
+2. Sube su contenido a la raíz del repositorio GitHub que publica solucarmas.cl.
+3. Espera el deploy y recarga con Ctrl+F5.
+4. Comprueba index.html, tienda.html, pago.html, cuenta.html.
+
+ATENCIÓN: La conexión de cotizaciones necesita que Edge Function enviar-cotizacion esté publicada y que Resend esté configurado. Cambiar colores no resuelve ese servicio.
