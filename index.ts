@@ -2,8 +2,8 @@
 // Secretos REQUERIDOS en Supabase: RESEND_API_KEY y QUOTE_FROM_EMAIL.
 // El dominio del remitente debe estar verificado en Resend.
 const allowedOrigins = new Set(['https://solucarmas.cl','https://www.solucarmas.cl']);
-const labels = ['nombre','correo','telefono','tipo','marca','patente','anio','comuna','necesidad'] as const;
-const titles = ['Nombre y apellido','Correo electrónico','Teléfono','Tipo de vehículo','Marca y modelo','Patente','Año','Comuna','Necesidad / descripción'];
+const labels = ['nombre','correo','telefono','tipo','marca','modelo','patente','anio','comuna','necesidad'] as const;
+const titles = ['Nombre y apellido','Correo electrónico','Teléfono','Tipo de vehículo','Marca','Modelo','Patente','Año','Comuna','Necesidad / descripción'];
 const json=(data:unknown,status=200,origin='https://solucarmas.cl')=>new Response(JSON.stringify(data),{
   status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',
   'Access-Control-Allow-Origin':origin,'Vary':'Origin',

@@ -1,0 +1,10 @@
+SOLUCAR MÁS — EDICIÓN V6
+
+1. Sube TODO el contenido de este ZIP a la raíz del repositorio de GitHub, incluyendo assets, index.html, tienda.html, app.js, styles.css, pago.html, pago.js y demás archivos.
+2. Haz commit y recarga la web con Ctrl+F5.
+3. Cotizaciones: ahora piden patente obligatoria, además de marca y modelo por separado.
+4. Para que el campo Modelo se incluya en el correo y CSV, actualiza la Edge Function enviar-cotizacion con supabase/functions/enviar-cotizacion/index.ts.
+5. Verifica Resend, las variables secretas y la función; no se ha enviado una prueba real desde este entorno.
+6. Tienda: se agregaron tres fotografías conceptuales referenciales a productos correspondientes (filtro de aceite, pastillas y ampolleta); los demás conservan ilustraciones claras y precisas en SVG para no representar productos incorrectos.
+7. Peugeot: se ajustó la imagen referencial Peugeot Partner accidentada ya incorporada en la sección visual. No representa un vehículo real en venta.
+8. Los precios y productos siguen siendo demostrativos. Elegir forma de pago NO procesa un cobro real.
