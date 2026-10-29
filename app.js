@@ -37,6 +37,39 @@ function closeOverlay(){const backdrop=$('#dialogBackdrop'),panel=$('#cartPanel'
 function setupUI(){document.querySelectorAll('[data-icon]').forEach(el=>{const name=el.dataset.icon;el.innerHTML=icon(name)});let saved;try{saved=localStorage.getItem(SETTINGS.themeKey)}catch{};setTheme(saved||document.documentElement.dataset.theme||'light');$('#themeToggle').addEventListener('click',()=>setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark',true));$('#menuToggle').addEventListener('click',()=>{const isOpen=$('#mainNav').classList.toggle('open');$('#menuToggle').setAttribute('aria-expanded',String(isOpen))});document.querySelectorAll('.main-nav a').forEach(a=>a.addEventListener('click',()=>{$('#mainNav').classList.remove('open');$('#menuToggle').setAttribute('aria-expanded','false')}));$('#cartOpen').addEventListener('click',()=>openOverlay('cart'));$('#accountOpen').addEventListener('click',()=>{window.location.href=$('#accountOpen').dataset.accountUrl||'cuenta.html'});$('#cartClose').addEventListener('click',closeOverlay);$('#dialogBackdrop').addEventListener('click',closeOverlay);document.addEventListener('keydown',e=>{if(e.key==='Escape')closeOverlay()});$('#checkoutStart').addEventListener('click',()=>{if(cartLines().length)window.location.assign('pago.html')});$('#backTop').addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));const progress=()=>{const max=document.documentElement.scrollHeight-innerHeight;$('#scrollMeter').style.width=(max>0?scrollY/max*100:0)+'%';$('#backTop').classList.toggle('show',scrollY>450)};addEventListener('scroll',progress,{passive:true});progress();$('#year').textContent=new Date().getFullYear();renderCart()}
 function setTheme(mode,persist=false){document.documentElement.dataset.theme=mode==='dark'?'dark':'light';const b=$('#themeToggle');if(b){b.innerHTML=icon(mode==='dark'?'sun':'moon');b.setAttribute('aria-label',mode==='dark'?'Activar modo claro':'Activar modo oscuro')}if(persist){try{localStorage.setItem(SETTINGS.themeKey,mode)}catch{}}}
 function setupReveals(){const nodes=[...document.querySelectorAll('.reveal')];if(matchMedia('(prefers-reduced-motion:reduce)').matches||!('IntersectionObserver'in window)){nodes.forEach(node=>node.classList.add('in-view'));return}const obs=new IntersectionObserver(entries=>{for(const entry of entries){if(entry.isIntersecting)entry.target.classList.add('in-view');else entry.target.classList.remove('in-view')}},{rootMargin:'0px 0px -7% 0px',threshold:.08});nodes.forEach(node=>obs.observe(node))}
+
+const COMMUNE_FALLBACK=["Antofagasta","Arica","Buin","Calama","Cerrillos","Cerro Navia","Chillán","Colina","Concón","Concepción","Coquimbo","Copiapó","Curicó","El Bosque","Estación Central","Hualpén","Huechuraba","Iquique","La Cisterna","La Florida","La Granja","La Pintana","La Reina","Las Condes","Linares","Lo Barnechea","Lo Espejo","Lo Prado","Los Ángeles","Maipú","Melipilla","Ñuñoa","Osorno","Ovalle","Peñalolén","Providencia","Puente Alto","Pudahuel","Punta Arenas","Quilicura","Quillota","Quilpué","Quinta Normal","Rancagua","Recoleta","Renca","San Antonio","San Bernardo","San Felipe","San Joaquín","San Miguel","San Pedro de la Paz","San Ramón","Santiago","Talca","Talcahuano","Temuco","Valdivia","Valparaíso","Viña del Mar","Villa Alemana","Vitacura"];
+function titleCase(value){return String(value||'').trim().toLocaleLowerCase('es-CL').replace(/(^|[\s-])([a-záéíóúñ])/g,(m,a,b)=>a+b.toLocaleUpperCase('es-CL'));}
+async function setupQuoteHelpers(){
+ const town=$('#quoteTown');const datalist=$('#comunasChile');if(town&&datalist){
+  let names=[];
+  const endpoints=['https://apis.modernizacion.cl/dpa/comunas','https://apis.digital.gob.cl/dpa/comunas'];
+  for(const endpoint of endpoints){
+   try{
+    const response=await fetch(endpoint,{headers:{Accept:'application/json'}});
+    if(!response.ok)continue;
+    const payload=await response.json();
+    const raw=Array.isArray(payload)?payload:payload&&Array.isArray(payload.data)?payload.data:[];
+    names=raw.map(item=>titleCase(item?.nombre||item?.Nombre||item?.name||'')).filter(Boolean);
+    if(names.length)break;
+   }catch(err){}
+  }
+  if(!names.length)names=[...COMMUNE_FALLBACK];
+  const unique=[...new Set(names)].sort((a,b)=>a.localeCompare(b,'es-CL'));
+  datalist.replaceChildren(...unique.map(name=>{const option=document.createElement('option');option.value=name;return option}));
+ }
+}
+function normalizePhoneForQuote(raw,countryCode){
+ const code=String(countryCode||'+56').trim();
+ let value=String(raw||'').trim();
+ if(!value)return '';
+ const digitsCode=code.replace(/\D/g,'');
+ let digits=value.replace(/\D/g,'');
+ if(digitsCode&&digits.startsWith(digitsCode)&&digits.length>digitsCode.length+6)digits=digits.slice(digitsCode.length);
+ if(code==='+56'&&digits.startsWith('09'))digits=digits.slice(1);
+ const readable=digits?digits.replace(/(\d{1,4})(?=\d)/g,'$1 ').trim():value.replace(/\s+/g,' ').trim();
+ return (code+' '+readable).replace(/\s+/g,' ').trim();
+}
 function setupMailForms(){
 const quote=$('#quoteForm');
 if(quote)quote.addEventListener('submit',async e=>{
@@ -46,8 +79,13 @@ if(quote)quote.addEventListener('submit',async e=>{
  status.classList.remove('is-success','is-error');
  if(!/^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i.test(cfg.url||'')||!cfg.publishableKey){status.textContent='Servicio no configurado. Comunícate con contacto@solucarmas.cl.';status.classList.add('is-error');return;}
  const d=new FormData(quote);
+ const phoneField=$('#quotePhone');
+ const phoneCountry=$('#quotePhoneCountry');
  const fields=['nombre','correo','telefono','patente','comuna','necesidad'];
  const payload=Object.fromEntries(fields.map(k=>[k,String(d.get(k)||'').trim()]));
+ payload.telefono=normalizePhoneForQuote(phoneField?phoneField.value:payload.telefono,phoneCountry?phoneCountry.value:'+56');
+ if(phoneField)phoneField.value=payload.telefono;
+ payload.comuna=titleCase(payload.comuna);
  payload.website=String(d.get('website')||'');
  payload.patente=payload.patente.toUpperCase().replace(/[^A-Z0-9]/g,'');if(/^[A-Z]{3}[0-9]{2}$/.test(payload.patente))payload.patente=payload.patente.slice(0,3)+'0'+payload.patente.slice(3);
  if(!/^[A-Z0-9]{6}$/.test(payload.patente)){
@@ -77,7 +115,7 @@ if(quote)quote.addEventListener('submit',async e=>{
    }
    // Solo se genera un comprobante visual si el backend confirmó la recepción.
    const receipt={reference:String(result.reference||'').slice(0,60),createdAt:Date.now()};
-   const receiptKey='solucar-cotizacion-recibida-v16';
+   const receiptKey='solucar-cotizacion-recibida-v20';
    let opened=false;
    if(confirmationTab && !confirmationTab.closed){
      try{
@@ -110,4 +148,4 @@ const contact=$('#contactForm');if(contact)contact.addEventListener('submit',e=>
 }
 function setupStore(){const grid=$('#productsGrid');if(!grid)return;let category='Todos';const search=$('#storeSearch');function draw(){const term=search.value.toLocaleLowerCase('es').trim();const found=productList.filter(p=>(category==='Todos'||p.category===category)&&(`${p.name} ${p.category} ${p.details}`).toLocaleLowerCase('es').includes(term));grid.replaceChildren();for(const p of found){const article=document.createElement('article');article.className='product-card reveal in-view';const top=document.createElement('div');top.className='product-image';top.innerHTML=`<img loading="lazy" width="640" height="480" src="${PRODUCT_PHOTOS[p.id]}" alt="Imagen referencial de ${p.name}"><span class="product-label">Imagen referencial</span>`;const content=document.createElement('div');content.className='product-content';const cat=document.createElement('span');cat.className='product-category';cat.textContent=p.category;const name=document.createElement('h3');name.textContent=p.name;const desc=document.createElement('div');desc.className='product-sub';desc.textContent=p.details;const bottom=document.createElement('div');bottom.className='product-bottom';const price=document.createElement('div');price.className='product-price';price.textContent=money(p.price);const small=document.createElement('small');small.textContent='Precio ilustrativo — sujeto a cotización';price.append(small);const add=document.createElement('button');add.type='button';add.className='add-product';add.innerHTML='+';add.setAttribute('aria-label','Agregar al carrito: '+p.name);add.addEventListener('click',()=>addToCart(p.id));bottom.append(price,add);content.append(cat,name,desc,bottom);article.append(top,content);grid.append(article)}$('#noResults').hidden=found.length>0}
 $('#productFilters').addEventListener('click',e=>{const btn=e.target.closest('button[data-category]');if(!btn)return;category=btn.dataset.category;$('#productFilters').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b===btn)));draw()});search.addEventListener('input',draw);draw()}
-document.addEventListener('DOMContentLoaded',()=>{setupUI();setupMailForms();setupStore();setupReveals()});
+document.addEventListener('DOMContentLoaded',()=>{setupUI();setupMailForms();setupStore();setupReveals();setupQuoteHelpers()});

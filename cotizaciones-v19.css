@@ -31,3 +31,22 @@ html body .quote-form-v19 .form-status{line-height:1.6;margin:7px 0 0}
 html[data-theme="dark"] body .quote-form-v19 .quote-stage-index{background:#372332;color:#ff7581}
 @media(max-width:850px){html body .quote-wrap{grid-template-columns:1fr;gap:28px}}
 @media(max-width:580px){html body .quote-form-v19 .quote-form-heading{padding:22px 20px 19px}html body .quote-form-v19 .quote-stage{padding:20px 20px 22px}html body .quote-form-v19 .quote-stage-fields{grid-template-columns:1fr;gap:13px}html body .quote-form-v19 .quote-stage-index{width:32px;height:32px;flex-basis:32px}html body .quote-form-v19 .quote-form-footer{padding:20px}html body .quote-form-v19 .plate-highlight input{max-width:100%}}
+
+
+/* SOLUCAR MÁS V20 · formulario de cotización más limpio */
+html body .quote-wrap{grid-template-columns:minmax(0,.84fr) minmax(0,1.16fr);gap:clamp(24px,4vw,54px)}
+html body .quote-form-v19 .quote-form-heading{background:linear-gradient(180deg,var(--surface) 0%,var(--surface2) 100%)!important}
+html body .quote-form-v19 .quote-stage--vehicle{background:transparent!important}
+html body .quote-form-v19 .field input,html body .quote-form-v19 .field textarea,html body .quote-form-v19 .field select{border:1px solid var(--line)!important;background:var(--surface)!important;border-radius:12px!important;min-height:48px;padding:12px 14px;color:var(--ink)!important;font:inherit;box-shadow:none!important}
+html body .quote-form-v19 .field select{appearance:none}
+html body .quote-form-v19 .plate-highlight{padding:0!important;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important}
+html body .quote-form-v19 .plate-highlight input{max-width:100%;text-transform:uppercase;letter-spacing:.08em;font-size:1.03rem;font-weight:850;border:1px solid var(--line)!important;background:var(--surface)!important}
+html body .quote-form-v19 .plate-highlight small{margin-top:7px;font-size:.76rem;color:var(--muted)}
+html body .quote-form-v19 .field .field-note{display:block;margin-top:6px;line-height:1.5;font-size:.74rem;color:var(--muted)}
+html body .quote-form-v19 .phone-combo{display:grid;grid-template-columns:minmax(120px,146px) 1fr;gap:12px}
+html body .quote-form-v19 .phone-combo select{text-align:left;font-weight:700}
+html body .quote-form-v19 .phone-field{align-self:start}
+html body .quote-form-v19 .quote-stage-title{margin-bottom:16px}
+html body .quote-form-v19 .quote-form-footer{padding:24px 32px 30px}
+html body .quote-form-v19 .form-help{font-size:.76rem}
+@media(max-width:580px){html body .quote-form-v19 .phone-combo{grid-template-columns:1fr}html body .quote-form-v19 .quote-form-footer{padding:20px}}
