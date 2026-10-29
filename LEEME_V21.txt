@@ -1,0 +1,1 @@
+SOLUCAR MÁS V21: contacto +56 9 2252 4480 para WhatsApp y llamadas en portada y pie de página; logo único en pantalla de confirmación. No se requiere modificar Supabase. Subir los archivos HTML y contacto-v21.css a GitHub.

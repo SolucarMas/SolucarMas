@@ -1,0 +1,10 @@
+/* V21 · contacto directo */
+.direct-contact-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
+.direct-contact-actions a{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:10px 16px;border-radius:10px;border:1px solid var(--blue);color:var(--blue2);font-weight:800;text-decoration:none}
+.direct-contact-actions a:first-child{background:var(--blue);color:#fff}
+.direct-contact-actions a:hover{filter:brightness(.93)}
+.solucar-footer-contact{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:22px 0;border-top:1px solid rgba(255,255,255,.2);color:#e7eef9;font-size:.94rem}
+.solucar-footer-contact div{display:flex;gap:14px;flex-wrap:wrap}
+.solucar-footer-contact a{color:#bcd7ff;text-decoration:underline;text-underline-offset:3px;font-weight:750}
+.solucar-footer-contact a:hover{color:#fff}
+@media(max-width:600px){.solucar-footer-contact{align-items:flex-start;flex-direction:column}}
