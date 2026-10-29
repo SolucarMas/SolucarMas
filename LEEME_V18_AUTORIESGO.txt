@@ -1,0 +1,43 @@
+SOLUCAR MÁS V18 — CONSULTA GRATUITA AUTORIESGO
+==================================================
+
+QUÉ CAMBIA
+- Sustituye GetAPI de pago por el endpoint gratuito documentado de AutoRiesgo:
+  GET https://api.autoriesgo.cl/api/v1/report/agent/lookup?patente=PATENTE
+- No hace falta API key ni configurar GETAPI_API_KEY.
+- Se piden solo patente, datos de contacto, comuna y descripción del repuesto.
+- El servidor incluye en el correo y CSV los datos básicos disponibles: marca, modelo,
+  año y tipo. Nunca consulta ni incorpora datos del propietario (nombre o RUT),
+  multas, compras ni informes de pago.
+- Mantiene el envío a contacto@solucarmas.cl y el correo de confirmación al cliente.
+- Si AutoRiesgo no encuentra la patente, falla o limita consultas, se envía
+  igualmente la cotización con la patente, marcando los datos pendientes.
+- La consulta se realiza al enviar (no autocompleta campos antes de enviar).
+
+INSTALACIÓN
+1) GitHub: sube index.html y app.js a la raíz de tu repositorio, reemplazando
+   esos dos archivos. Si tienes V17 instalada puedes conservar todo lo demás.
+2) Supabase > Edge Functions > enviar-cotizacion > Code: reemplaza TODO el código
+   por supabase/functions/enviar-cotizacion/index.ts y presiona Deploy.
+3) Conserva Verify JWT desactivado si la función recibe solicitudes públicas.
+4) Conserva los secretos RESEND_API_KEY y QUOTE_FROM_EMAIL (no los cambies).
+   GETAPI_API_KEY ya no se usa; puedes eliminarlo si lo habías creado.
+5) Envía una cotización de prueba y revisa el mensaje y el CSV recibido.
+   Confirma el mensaje al cliente y el comprobante de la página web.
+
+CONDICIONES DEL PROVEEDOR
+- AutoRiesgo documenta este endpoint sin clave, pero con límites de uso.
+  No hay garantía de consultas gratuitas ilimitadas; para volumen elevado
+  recomienda la API comercial. Respeta sus términos y encabezados Retry-After.
+- Prohíbe extraer/scrapear el HTML del sitio: se usa exclusivamente el endpoint
+  público documentado de agentes y no se intenta eludir los límites.
+- Permite datos como insumo para cotizar repuestos; no revendas informes.
+- Fuente: https://autoriesgo.cl/llms.txt y https://autoriesgo.cl/terminos
+
+SEGURIDAD
+- La función es pública y debe contar con protección anti-spam/rate limiting
+  antes de recibir tráfico importante. Un captcha Turnstile opcional está previsto
+  en el código, pero exige agregar el widget en la página para poder usarlo.
+- La patente no demuestra titularidad ni compatibilidad de la pieza.
+- No fue posible probar la API en vivo desde este entorno: hay que hacer un
+  envío de prueba tras desplegar para confirmar qué campos devuelve.

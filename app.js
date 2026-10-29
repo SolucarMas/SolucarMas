@@ -49,9 +49,9 @@ if(quote)quote.addEventListener('submit',async e=>{
  const fields=['nombre','correo','telefono','patente','comuna','necesidad'];
  const payload=Object.fromEntries(fields.map(k=>[k,String(d.get(k)||'').trim()]));
  payload.website=String(d.get('website')||'');
- payload.patente=payload.patente.toUpperCase().replace(/[.\s]/g,'').replace(/[^A-Z0-9-]/g,'');
- if(!/^[A-Z0-9-]{5,12}$/.test(payload.patente)){
-   status.textContent='Escribe una patente válida de entre 5 y 12 caracteres, sin puntos ni espacios.';status.classList.add('is-error');document.getElementById('quotePlate')?.focus();return;
+ payload.patente=payload.patente.toUpperCase().replace(/[^A-Z0-9]/g,'');if(/^[A-Z]{3}[0-9]{2}$/.test(payload.patente))payload.patente=payload.patente.slice(0,3)+'0'+payload.patente.slice(3);
+ if(!/^[A-Z0-9]{6}$/.test(payload.patente)){
+   status.textContent='Escribe una patente chilena válida de 6 caracteres (ejemplo: ABCD12 o AB1234).';status.classList.add('is-error');document.getElementById('quotePlate')?.focus();return;
  }
  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.correo)){
    status.textContent='Revisa el correo electrónico.';status.classList.add('is-error');return;
@@ -61,7 +61,7 @@ if(quote)quote.addEventListener('submit',async e=>{
  const confirmationUrl=new URL('cotizacion-recibida.html',location.href);
  let confirmationTab=null;
  try{confirmationTab=window.open(confirmationUrl.href,'_blank');}catch{}
- submit.disabled=true;status.textContent='Estamos enviando tu solicitud…';
+ submit.disabled=true;status.textContent='Enviando solicitud y consultando datos básicos de la patente…';
  let timer;
  try{
    const controller=new AbortController();timer=setTimeout(()=>controller.abort(),23000);

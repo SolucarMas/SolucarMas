@@ -1,7 +1,7 @@
 // SOLUCAR MÁS · Supabase Edge Function: enviar-cotizacion
 // Secretos REQUERIDOS: RESEND_API_KEY y QUOTE_FROM_EMAIL.
-// Opcional: GETAPI_API_KEY (proveedor GetAPI para enriquecer cotizaciones por patente).
-// La clave de consulta permanece solo en Supabase; nunca publicarla en GitHub.
+// Consulta gratuita de datos básicos del vehículo vía AutoRiesgo (endpoint público /report/agent/lookup).
+// No se envía ni se almacena información de propietarios. Respetar límites y términos de AutoRiesgo.
 // El dominio del remitente debe estar verificado en Resend.
 const allowedOrigins = new Set(['https://solucarmas.cl','https://www.solucarmas.cl']);
 const labels = ['nombre','correo','telefono','patente','comuna','necesidad'] as const;
@@ -24,35 +24,66 @@ const toBase64=(bytes:Uint8Array)=>{
 };
 // SOLO datos técnicos útiles para cotizar repuestos. No pedir ni guardar datos del propietario.
 type VehicleResult={ estado:string; datos:Record<string,string> };
-const cleanField=(value:unknown,max=100):string=>typeof value==='string'||typeof value==='number'
-  ? String(value).trim().slice(0,max):'';
+// Obtener exclusivamente datos técnicos de identificación: no leer ni copiar el propietario,
+// RUT, informes de riesgo, multas ni enlaces de compra que también podrían llegar en el JSON.
+const cleanField=(value:unknown,max=90):string=>
+  typeof value==='string'||typeof value==='number' ? String(value).trim().slice(0,max):'';
+const normalizePlate=(value:string):string=>{
+  const plate=value.toUpperCase().replace(/[^A-Z0-9]/g,'');
+  // AutoRiesgo admite abreviaturas de algunas patentes antiguas (5 caracteres).
+  if(/^[A-Z]{3}[0-9]{2}$/.test(plate))return plate.slice(0,3)+'0'+plate.slice(3);
+  return plate;
+};
 async function lookupVehicle(plate:string):Promise<VehicleResult>{
-  const key=Deno.env.get('GETAPI_API_KEY');
-  if(!key)return {estado:'Sin consulta automática (clave GETAPI_API_KEY no configurada)',datos:{}};
   const controller=new AbortController();
-  const timeout=setTimeout(()=>controller.abort(),8500);
+  const timeout=setTimeout(()=>controller.abort(),6500);
   try{
-    const response=await fetch('https://chile.getapi.cl/v1/vehicles/plate/'+encodeURIComponent(plate),{
-      method:'GET',headers:{'x-api-key':key,'Accept':'application/json'},signal:controller.signal
+    const url='https://api.autoriesgo.cl/api/v1/report/agent/lookup?patente='+encodeURIComponent(plate);
+    const response=await fetch(url,{
+      method:'GET',headers:{'Accept':'application/json'},signal:controller.signal
     });
-    if(response.status===404)return {estado:'Patente no encontrada por el proveedor',datos:{}};
-    if(response.status===429)return {estado:'Proveedor temporalmente limitado; pendiente de verificación',datos:{}};
-    if(!response.ok){console.error('GetAPI status',response.status);return {estado:'Proveedor no disponible; pendiente de verificación',datos:{}};}
-    const jsonBody=await response.json();
-    const v=jsonBody?.data;
-    if(!v||typeof v!=='object'||Array.isArray(v))return {estado:'El proveedor no devolvió datos del vehículo',datos:{}};
-    // Esquema según documentación GetAPI: data.model.brand.name, data.model.name, data.year, etc.
-    const pairs:[string,unknown][]=[
-      ['Marca',v.model?.brand?.name],['Modelo',v.model?.name],['Año',v.year],
-      ['Tipo de vehículo',v.model?.typeVehicle?.name],['Versión',v.version],
-      ['Combustible',v.fuel],['Motor',v.engine],['Color',v.color],
-      ['Transmisión',v.transmission],['VIN/chasis',v.vinNumber]
+    if(response.status===404 || response.status===422)
+      return {estado:'AutoRiesgo no encontró información para esta patente; verificar con el cliente',datos:{}};
+    if(response.status===429){
+      // No reintentar hasta vencer Retry-After; un error externo jamás bloquea la cotización.
+      const retryAfter=response.headers.get('Retry-After');
+      console.warn('AutoRiesgo: límite alcanzado; Retry-After:',retryAfter);
+      return {estado:'AutoRiesgo alcanzó su límite de consultas gratuitas; pendiente de verificación',datos:{}};
+    }
+    if(!response.ok){
+      console.warn('AutoRiesgo no respondió correctamente; HTTP',response.status);
+      return {estado:'AutoRiesgo temporalmente no disponible; pendiente de verificación',datos:{}};
+    }
+    // El servicio publica { patente, vehicle_data:{ make,model,year,type,... }, purchase_full_report:{...} }.
+    const raw:unknown=await response.json();
+    if(!raw||typeof raw!=='object'||Array.isArray(raw))
+      return {estado:'Sin datos técnicos disponibles en AutoRiesgo',datos:{}};
+    const payload=raw as Record<string,unknown>;
+    const vehicleData=payload.vehicle_data;
+    if(!vehicleData||typeof vehicleData!=='object'||Array.isArray(vehicleData))
+      return {estado:'AutoRiesgo no encontró características del vehículo',datos:{}};
+    const obj=vehicleData as Record<string,unknown>;
+    // Compatibilidad con respuestas que anidan características en vehicle_data.data.
+    const nested=obj.data&&typeof obj.data==='object'&&!Array.isArray(obj.data)
+      ? obj.data as Record<string,unknown> : {};
+    const field=(...names:string[])=>{
+      for(const name of names){const a=cleanField(obj[name]);if(a)return a;const b=cleanField(nested[name]);if(b)return b;}
+      return '';
+    };
+    const pairs:[string,string][]=[
+      ['Marca',field('make','marca')],
+      ['Modelo',field('model','modelo')],
+      ['Año',field('year','anio','año')],
+      ['Tipo de vehículo',field('type','vehicle_type','tipo')]
     ];
-    const datos=Object.fromEntries(pairs.map(([k,val])=>[k,cleanField(val)]).filter(([,val])=>Boolean(val)));
-    return Object.keys(datos).length?{estado:'Consultado con GetAPI (datos referenciales)',datos}
-      :{estado:'Sin características disponibles en GetAPI',datos:{}};
-  }catch(error){console.error('GetAPI consulta falló',String(error));return {estado:'Consulta no disponible; pendiente de verificación',datos:{}};}
-  finally{clearTimeout(timeout)}
+    const datos=Object.fromEntries(pairs.filter(([,value])=>value));
+    return Object.keys(datos).length
+      ? {estado:'Consulta básica de AutoRiesgo realizada (información referencial)',datos}
+      : {estado:'AutoRiesgo no devolvió datos técnicos verificables',datos:{}};
+  }catch(error){
+    console.warn('No fue posible consultar AutoRiesgo:',String(error));
+    return {estado:'Consulta gratuita no disponible; pendiente de verificación',datos:{}};
+  }finally{clearTimeout(timeout)}
 }
 Deno.serve(async(req)=>{
   const origin=req.headers.get('origin')||'';
@@ -70,8 +101,8 @@ Deno.serve(async(req)=>{
   if(!data.nombre||!data.correo||!data.telefono||!data.patente||!data.necesidad)return json({ok:false,error:'Completa nombre, correo, teléfono, patente y descripción.'},400,cors);
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.correo)||data.correo.length>254)return json({ok:false,error:'Correo inválido.'},400,cors);
   if(!/^[\d +()\-.]{7,25}$/.test(data.telefono))return json({ok:false,error:'Teléfono inválido.'},400,cors);
-  data.patente=data.patente.toUpperCase().replace(/\s+/g,'');
-  if(!/^[A-Z0-9-]{5,12}$/.test(data.patente))return json({ok:false,error:'La patente indicada no tiene un formato válido.'},400,cors);
+  data.patente=normalizePlate(data.patente);
+  if(!/^[A-Z0-9]{6}$/.test(data.patente))return json({ok:false,error:'La patente indicada no tiene un formato válido.'},400,cors);
   for(const key of labels){if(data[key].length>(key==='necesidad'?2000:160))return json({ok:false,error:'Uno de los campos supera el límite permitido.'},400,cors)}
   // Protección opcional recomendada para producción: Cloudflare Turnstile (si se configura, es obligatoria).
   const turnstileSecret=Deno.env.get('TURNSTILE_SECRET_KEY');
@@ -83,8 +114,8 @@ Deno.serve(async(req)=>{
   const apiKey=Deno.env.get('RESEND_API_KEY');const from=Deno.env.get('QUOTE_FROM_EMAIL');
   if(!apiKey||!from)return json({ok:false,error:'Falta configurar el servicio de correo en Supabase.'},503,cors);
   const now=new Date();const reference='COT-'+now.toISOString().replace(/[-:.TZ]/g,'').slice(0,14)+'-'+crypto.randomUUID().slice(0,6).toUpperCase();
-  // Consultamos únicamente la patente; la información retornada NO identifica al propietario.
-  // Si la API no responde, la cotización se envía de todos modos con la patente.
+  // Consulta gratuita: características básicas, sin datos de propietarios.
+  // Nunca bloquear el envío si AutoRiesgo está caído, no encuentra patente o limita la cuota.
   const vehicle=await lookupVehicle(data.patente);
   const rows=[['Referencia',reference],['Fecha y hora (UTC)',now.toISOString()],
     ...labels.map((k,i)=>[titles[i],data[k]]),
@@ -97,8 +128,8 @@ Deno.serve(async(req)=>{
   const mail={
     from, to:['contacto@solucarmas.cl'],reply_to:data.correo,
     subject:`Nueva cotización SOLUCAR MÁS · ${reference}`,
-    html:`<div style="font-family:Arial,sans-serif;color:#10223a"><h1 style="color:#153c70">SOLUCAR <span style="color:#dc2436">MÁS</span></h1><h2>Nueva solicitud de cotización</h2><p>Un cliente solicitó una cotización indicando su patente. Se adjunta la planilla CSV para abrir en Excel. Los datos técnicos del vehículo, si aparecen, provienen de GetAPI y son referenciales; verifica compatibilidad antes de cotizar. Si la consulta no está disponible, confirma los datos con el cliente. Puedes consultar manualmente la patente en https://patenteschile.cl/.</p><table cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;max-width:750px">${tr}</table><p>Responde a este correo para contactar al cliente.</p></div>`,
-    text:rows.map(([k,v])=>k+': '+v).join('\n')+'\n\nConsulta manual referencial: https://patenteschile.cl/',
+    html:`<div style="font-family:Arial,sans-serif;color:#10223a"><h1 style="color:#153c70">SOLUCAR <span style="color:#dc2436">MÁS</span></h1><h2>Nueva solicitud de cotización</h2><p>Un cliente solicitó una cotización indicando su patente. Se adjunta la planilla CSV para abrir en Excel. Los datos técnicos del vehículo, cuando estén disponibles, proceden de AutoRiesgo y son referenciales. Verifica compatibilidad antes de vender repuestos. Si faltan datos, confírmalos con el cliente o consúltalos manualmente en https://autoriesgo.cl/.</p><table cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;max-width:750px">${tr}</table><p>Responde a este correo para contactar al cliente.</p></div>`,
+    text:rows.map(([k,v])=>k+': '+v).join('\n')+'\n\nConsulta manual referencial: https://autoriesgo.cl/',
     attachments:[{filename:`cotizacion-${reference}.csv`,content:attachment}]
   };
   try{
