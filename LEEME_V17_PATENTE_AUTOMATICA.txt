@@ -1,0 +1,46 @@
+SOLUCAR MÁS — V17 • COTIZACIONES SOLO CON PATENTE
+===============================================
+
+QUÉ CAMBIA
+- Se quitaron Tipo, Marca, Modelo y Año del formulario público.
+- El cliente indica patente, nombre, correo, teléfono, comuna y repuesto solicitado.
+- La función enviar-cotizacion intenta consultar las características con GetAPI
+  SI has contratado/configurado su API. Adjunta los datos obtenidos al correo
+  del equipo y a la planilla CSV, sin solicitar información del propietario.
+- Sin API, con patente no encontrada o con un error de la consulta, la
+  cotización sigue enviándose. El correo marca los datos como no verificados.
+- Se conserva la confirmación de recepción al cliente y la nueva pestaña.
+
+IMPORTANTE SOBRE PATENTES CHILE
+- patenteschile.cl ofrece un buscador web, pero no se encontró documentación
+  de una API pública autorizada para integraciones de terceros.
+- No se usa scraping ni acceso privado a Patentes Chile.
+- Para consultas automáticas se implementó la API documentada de GetAPI:
+  https://getapi.cl/docs/ (GET /v1/vehicles/plate/{plate}).
+- Obtener datos técnicos por patente puede tener costo y requiere clave.
+  GETAPI_API_KEY se guarda como secreto, no en GitHub. No se obtienen datos
+  personales de titulares o propietarios.
+
+PUBLICACIÓN PASO A PASO
+1) En GitHub: copia index.html y app.js de este paquete a la raíz del
+   repositorio. El resto de archivos puede mantenerse como está.
+2) En Supabase > Edge Functions > enviar-cotizacion > Code: sustituye el
+   contenido actual por supabase/functions/enviar-cotizacion/index.ts.
+   Presiona Deploy. Conserva Verify JWT desactivado para el formulario público.
+3) Resend: no cambies RESEND_API_KEY ni QUOTE_FROM_EMAIL; siguen funcionando.
+4) Opcional, para enriquecimiento AUTOMÁTICO: contrata un plan de GetAPI,
+   obtiene tu API key y guárdala como secreto GETAPI_API_KEY en Supabase.
+   Nunca publiques este secreto en GitHub ni lo envíes por chat.
+5) Debes proteger la función pública con controles antispam y límites de uso,
+   especialmente si consultas una API comercial (cada consulta puede consumir cuota).
+6) Prueba una cotización real con una patente que puedas comprobar. Verifica
+   correo a contacto@solucarmas.cl, planilla CSV y respuesta de confirmación.
+   Si no existe información disponible, el correo lo indicará y seguirá llegando.
+
+SEGURIDAD Y EXACTITUD
+- Los datos de la API son de referencia y pueden estar incompletos.
+- La patente no prueba titularidad y no garantiza compatibilidad de repuestos.
+- Solo se consulta la información técnica necesaria para la cotización.
+- No se conoce si la clave opcional es válida hasta probar el servidor.
+- La función con GETAPI_API_KEY deberá protegerse con una solución de
+  rate limiting / captcha antes de enviarla a producción con tráfico real.

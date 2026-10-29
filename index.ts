@@ -1,9 +1,11 @@
 // SOLUCAR MÁS · Supabase Edge Function: enviar-cotizacion
-// Secretos REQUERIDOS en Supabase: RESEND_API_KEY y QUOTE_FROM_EMAIL.
+// Secretos REQUERIDOS: RESEND_API_KEY y QUOTE_FROM_EMAIL.
+// Opcional: GETAPI_API_KEY (proveedor GetAPI para enriquecer cotizaciones por patente).
+// La clave de consulta permanece solo en Supabase; nunca publicarla en GitHub.
 // El dominio del remitente debe estar verificado en Resend.
 const allowedOrigins = new Set(['https://solucarmas.cl','https://www.solucarmas.cl']);
-const labels = ['nombre','correo','telefono','tipo','marca','modelo','patente','anio','comuna','necesidad'] as const;
-const titles = ['Nombre y apellido','Correo electrónico','Teléfono','Tipo de vehículo','Marca','Modelo','Patente','Año','Comuna','Necesidad / descripción'];
+const labels = ['nombre','correo','telefono','patente','comuna','necesidad'] as const;
+const titles = ['Nombre y apellido','Correo electrónico','Teléfono','Patente','Comuna','Necesidad / descripción'];
 const json=(data:unknown,status=200,origin='https://solucarmas.cl')=>new Response(JSON.stringify(data),{
   status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',
   'Access-Control-Allow-Origin':origin,'Vary':'Origin',
@@ -20,6 +22,38 @@ const toBase64=(bytes:Uint8Array)=>{
   let out='';for(let i=0;i<bytes.length;i+=8192)out+=String.fromCharCode(...bytes.subarray(i,i+8192));
   return btoa(out);
 };
+// SOLO datos técnicos útiles para cotizar repuestos. No pedir ni guardar datos del propietario.
+type VehicleResult={ estado:string; datos:Record<string,string> };
+const cleanField=(value:unknown,max=100):string=>typeof value==='string'||typeof value==='number'
+  ? String(value).trim().slice(0,max):'';
+async function lookupVehicle(plate:string):Promise<VehicleResult>{
+  const key=Deno.env.get('GETAPI_API_KEY');
+  if(!key)return {estado:'Sin consulta automática (clave GETAPI_API_KEY no configurada)',datos:{}};
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),8500);
+  try{
+    const response=await fetch('https://chile.getapi.cl/v1/vehicles/plate/'+encodeURIComponent(plate),{
+      method:'GET',headers:{'x-api-key':key,'Accept':'application/json'},signal:controller.signal
+    });
+    if(response.status===404)return {estado:'Patente no encontrada por el proveedor',datos:{}};
+    if(response.status===429)return {estado:'Proveedor temporalmente limitado; pendiente de verificación',datos:{}};
+    if(!response.ok){console.error('GetAPI status',response.status);return {estado:'Proveedor no disponible; pendiente de verificación',datos:{}};}
+    const jsonBody=await response.json();
+    const v=jsonBody?.data;
+    if(!v||typeof v!=='object'||Array.isArray(v))return {estado:'El proveedor no devolvió datos del vehículo',datos:{}};
+    // Esquema según documentación GetAPI: data.model.brand.name, data.model.name, data.year, etc.
+    const pairs:[string,unknown][]=[
+      ['Marca',v.model?.brand?.name],['Modelo',v.model?.name],['Año',v.year],
+      ['Tipo de vehículo',v.model?.typeVehicle?.name],['Versión',v.version],
+      ['Combustible',v.fuel],['Motor',v.engine],['Color',v.color],
+      ['Transmisión',v.transmission],['VIN/chasis',v.vinNumber]
+    ];
+    const datos=Object.fromEntries(pairs.map(([k,val])=>[k,cleanField(val)]).filter(([,val])=>Boolean(val)));
+    return Object.keys(datos).length?{estado:'Consultado con GetAPI (datos referenciales)',datos}
+      :{estado:'Sin características disponibles en GetAPI',datos:{}};
+  }catch(error){console.error('GetAPI consulta falló',String(error));return {estado:'Consulta no disponible; pendiente de verificación',datos:{}};}
+  finally{clearTimeout(timeout)}
+}
 Deno.serve(async(req)=>{
   const origin=req.headers.get('origin')||'';
   if(origin&&!allowedOrigins.has(origin))return json({ok:false,error:'Origen no autorizado.'},403,'https://solucarmas.cl');
@@ -30,7 +64,7 @@ Deno.serve(async(req)=>{
   if(Number(req.headers.get('content-length')||0)>16000)return json({ok:false,error:'Solicitud demasiado grande.'},413,cors);
   let input:Record<string,unknown>;
   try{input=await req.json();if(!input||typeof input!=='object'||Array.isArray(input))throw Error()}catch{return json({ok:false,error:'Solicitud inválida.'},400,cors)}
-  if(input.website)return json({ok:true,reference:'RECIBIDA'},200,cors); // Campo trampa para bots.
+  if(input.website)return json({ok:true,reference:'RECIBIDA'},200,cors); // Honeypot: bots, no envía correo.
   const data:Record<string,string>={};
   for(const key of labels){if(typeof input[key]!=='string')return json({ok:false,error:'Los datos de la cotización están incompletos.'},400,cors);data[key]=(input[key] as string).trim()}
   if(!data.nombre||!data.correo||!data.telefono||!data.patente||!data.necesidad)return json({ok:false,error:'Completa nombre, correo, teléfono, patente y descripción.'},400,cors);
@@ -49,15 +83,22 @@ Deno.serve(async(req)=>{
   const apiKey=Deno.env.get('RESEND_API_KEY');const from=Deno.env.get('QUOTE_FROM_EMAIL');
   if(!apiKey||!from)return json({ok:false,error:'Falta configurar el servicio de correo en Supabase.'},503,cors);
   const now=new Date();const reference='COT-'+now.toISOString().replace(/[-:.TZ]/g,'').slice(0,14)+'-'+crypto.randomUUID().slice(0,6).toUpperCase();
-  const rows=[['Referencia',reference],['Fecha y hora (UTC)',now.toISOString()],...labels.map((k,i)=>[titles[i],data[k]])];
+  // Consultamos únicamente la patente; la información retornada NO identifica al propietario.
+  // Si la API no responde, la cotización se envía de todos modos con la patente.
+  const vehicle=await lookupVehicle(data.patente);
+  const rows=[['Referencia',reference],['Fecha y hora (UTC)',now.toISOString()],
+    ...labels.map((k,i)=>[titles[i],data[k]]),
+    ['Consulta de datos del vehículo',vehicle.estado],
+    ...Object.entries(vehicle.datos).map(([key,value])=>['Vehículo · '+key,value])
+  ];
   const csv='\uFEFF' + rows.map(r=>r.map(safeCSV).join(';')).join('\r\n')+'\r\n';
   const attachment=toBase64(new TextEncoder().encode(csv));
   const tr=rows.map(([label,value])=>`<tr><td style="padding:10px;border-bottom:1px solid #e0e7f0"><strong>${htmlEscape(label)}</strong></td><td style="padding:10px;border-bottom:1px solid #e0e7f0;white-space:pre-wrap">${htmlEscape(value)}</td></tr>`).join('');
   const mail={
     from, to:['contacto@solucarmas.cl'],reply_to:data.correo,
     subject:`Nueva cotización SOLUCAR MÁS · ${reference}`,
-    html:`<div style="font-family:Arial,sans-serif;color:#10223a"><h1 style="color:#153c70">SOLUCAR <span style="color:#dc2436">MÁS</span></h1><h2>Nueva solicitud de cotización</h2><p>Un cliente completó el formulario de tu sitio web. Se adjunta la planilla CSV para abrir en Excel.</p><table cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;max-width:750px">${tr}</table><p>Responde a este correo para contactar al cliente.</p></div>`,
-    text:rows.map(([k,v])=>k+': '+v).join('\n'),
+    html:`<div style="font-family:Arial,sans-serif;color:#10223a"><h1 style="color:#153c70">SOLUCAR <span style="color:#dc2436">MÁS</span></h1><h2>Nueva solicitud de cotización</h2><p>Un cliente solicitó una cotización indicando su patente. Se adjunta la planilla CSV para abrir en Excel. Los datos técnicos del vehículo, si aparecen, provienen de GetAPI y son referenciales; verifica compatibilidad antes de cotizar. Si la consulta no está disponible, confirma los datos con el cliente. Puedes consultar manualmente la patente en https://patenteschile.cl/.</p><table cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;max-width:750px">${tr}</table><p>Responde a este correo para contactar al cliente.</p></div>`,
+    text:rows.map(([k,v])=>k+': '+v).join('\n')+'\n\nConsulta manual referencial: https://patenteschile.cl/',
     attachments:[{filename:`cotizacion-${reference}.csv`,content:attachment}]
   };
   try{
@@ -82,6 +123,6 @@ Deno.serve(async(req)=>{
       customer_email_sent=clientResponse.ok;
       if(!customer_email_sent)console.error('Confirmación cliente rechazada:',clientResponse.status,await clientResponse.text());
     }catch(customerError){console.error('No se pudo enviar confirmación al cliente:',customerError)}
-    return json({ok:true,reference,customer_email_sent},200,cors);
+    return json({ok:true,reference,customer_email_sent,vehicle_lookup:vehicle.estado},200,cors);
   }catch(error){console.error('Error de envío:',error);return json({ok:false,error:'No fue posible conectar con el servicio de correo.'},502,cors)}
 });

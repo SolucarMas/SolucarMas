@@ -46,7 +46,7 @@ if(quote)quote.addEventListener('submit',async e=>{
  status.classList.remove('is-success','is-error');
  if(!/^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i.test(cfg.url||'')||!cfg.publishableKey){status.textContent='Servicio no configurado. Comunícate con contacto@solucarmas.cl.';status.classList.add('is-error');return;}
  const d=new FormData(quote);
- const fields=['nombre','correo','telefono','tipo','marca','modelo','patente','anio','comuna','necesidad'];
+ const fields=['nombre','correo','telefono','patente','comuna','necesidad'];
  const payload=Object.fromEntries(fields.map(k=>[k,String(d.get(k)||'').trim()]));
  payload.website=String(d.get('website')||'');
  payload.patente=payload.patente.toUpperCase().replace(/[.\s]/g,'').replace(/[^A-Z0-9-]/g,'');
