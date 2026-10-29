@@ -70,11 +70,39 @@ async function lookupVehicle(plate:string):Promise<VehicleResult>{
       for(const name of names){const a=cleanField(obj[name]);if(a)return a;const b=cleanField(nested[name]);if(b)return b;}
       return '';
     };
+    // VIN / chasis: puede estar en vehicle_data, vehicle_data.data o en una
+    // sección técnica anidada. No buscar dentro de owner, informes o compras.
+    const asObject=(value:unknown):Record<string,unknown>=>
+      value&&typeof value==='object'&&!Array.isArray(value) ? value as Record<string,unknown> : {};
+    const vinSources=[obj,nested,asObject(obj.vehicle),asObject(obj.specs),
+      asObject(obj.identification),asObject(nested.vehicle),asObject(nested.specs),
+      asObject(nested.identification)];
+    const vinNames=['vin','VIN','chassis','chasis','chassis_number','chassisNumber',
+      'chasis_number','chasisNumber','numero_chasis','numeroChasis','nro_chasis',
+      'num_chasis','numero_de_chasis','vin_number','vinNumber','nroVin','nro_vin'];
+    const validVin=(value:unknown):string=>{
+      if(typeof value!=='string'&&typeof value!=='number')return '';
+      const raw=String(value).trim().toUpperCase();
+      if(!raw||/^(N\/?A|SIN (DATO|INFORMACI[ÓO]N)|NO DISPONIBLE|NULL|UNKNOWN|PENDIENTE|\-+)$/i.test(raw))return '';
+      // El chasis puede no tener 17 caracteres en vehículos antiguos.
+      const cleaned=raw.replace(/[\s.\-]/g,'');
+      return /^[A-Z0-9]{8,25}$/.test(cleaned) ? cleaned : '';
+    };
+    let vin='';
+    for(const source of vinSources){
+      for(const name of vinNames){
+        vin=validVin(source[name]);
+        if(vin)break;
+      }
+      if(vin)break;
+    }
     const pairs:[string,string][]=[
       ['Marca',field('make','marca')],
       ['Modelo',field('model','modelo')],
       ['Año',field('year','anio','año')],
-      ['Tipo de vehículo',field('type','vehicle_type','tipo')]
+      ['Tipo de vehículo',field('type','vehicle_type','tipo')],
+      // Si no hay VIN válido, no se genera esta fila ni en el email ni en el CSV.
+      ['Chasis (VIN)',vin]
     ];
     const datos=Object.fromEntries(pairs.filter(([,value])=>value));
     return Object.keys(datos).length
@@ -154,6 +182,7 @@ Deno.serve(async(req)=>{
       customer_email_sent=clientResponse.ok;
       if(!customer_email_sent)console.error('Confirmación cliente rechazada:',clientResponse.status,await clientResponse.text());
     }catch(customerError){console.error('No se pudo enviar confirmación al cliente:',customerError)}
-    return json({ok:true,reference,customer_email_sent,vehicle_lookup:vehicle.estado},200,cors);
+    return json({ok:true,reference,customer_email_sent,vehicle_lookup:vehicle.estado,
+      ...(vehicle.datos['Chasis (VIN)']?{vin:vehicle.datos['Chasis (VIN)']}:{})},200,cors);
   }catch(error){console.error('Error de envío:',error);return json({ok:false,error:'No fue posible conectar con el servicio de correo.'},502,cors)}
 });

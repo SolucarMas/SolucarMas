@@ -1,0 +1,17 @@
+SOLUCAR MÁS · V19 · VIN opcional y formulario reorganizado
+
+GitHub Pages: subir/reemplazar index.html y subir cotizaciones-v19.css a la raíz.
+El resto de los archivos de V18 se conserva intacto.
+
+Supabase: Edge Functions → enviar-cotizacion → Code → reemplazar index.ts del editor por
+supabase/functions/enviar-cotizacion/index.ts → Deploy.
+No debes cambiar secretos ni volver a instalar Resend.
+
+El VIN se extrae únicamente de campos técnicos de AutoRiesgo (vehicle_data o subobjetos
+de identificación técnica). No se solicita ni procesa el dueño del vehículo.
+Se incluye en correo, CSV y respuesta JSON solo cuando está disponible y parece válido.
+Que la consulta gratuita web muestre VIN no garantiza que el endpoint agent/lookup lo entregue
+para todas las patentes. Sin VIN, no se agrega campo vacío.
+
+Prueba una cotización real después de publicar la función y verifica el correo, CSV y la
+página de confirmación. No se cambió el código de envío del frontend.
