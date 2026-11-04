@@ -1,38 +1,80 @@
-# SOLUCAR MÁS — Integración Webpay Plus
+# SOLUCAR MÁS — Pago simplificado + catálogo editable + panel de administración
 
-## Qué incluye
+## Cambios realizados
 
-- `index.html`: el archivo original, con referencia a la versión actualizada de `app.js`.
-- `app.js`: carrito de la tienda (máximo 20 unidades por producto) y acceso a `pago.html`.
-- `pago.html`: elección de Webpay Plus / consulta por transferencia y formulario de comprador.
-- `pago.js`: resumen de compra, enlace al backend de pago y redirección POST `token_ws` a Transbank.
-- `pago-resultado.html`: consulta el estado **en el servidor** y solo confirma compras aprobadas.
-- `supabase/functions/webpay/index.ts`: servidor para crear, confirmar y consultar transacciones (no publica credenciales).
-- `supabase/migrations/20261104_webpay_orders.sql`: tabla privada de pedidos, con RLS.
+1. **Pago:** únicamente tarjeta de débito, crédito o prepago. Se eliminó la opción de transferencia del checkout. Bajo el botón aparecen el **WhatsApp y teléfono +56 9 2252 4480**.
+2. **Datos:** el teléfono usa el mismo selector de prefijos internacionales que el formulario de cotizaciones y la comuna tiene autocompletado por `datalist`, con datos de APIs de comunas de Chile cuando respondan y una lista local de respaldo.
+3. **Administrador:** `administracion.html` y `administracion.js` ofrecen acceso con Supabase Auth para el correo **contacto@solucar.cl**. Puede agregar y editar productos, subir fotografías, actualizar precios, categorías y descripciones, ordenar productos y ocultarlos. **No se permiten cambios sin estar autorizado por RLS**.
+4. **Precio seguro:** `app.js` y `pago.js` muestran precios de la tabla `public.store_products`; `webpay/index.ts` vuelve a leer la tabla en el servidor, comprueba el precio esperado y **rechaza precios cambiados** (HTTP 409). El monto no proviene del navegador.
+5. **Fotos:** se guardan en un bucket público llamado `store-products`, con **subida restringida a administradores**, JPG/PNG/WebP, máx. 5 MB. Las imágenes originales incrustadas siguen funcionando mientras no se reemplazan.
 
-## Lo que está listo y lo que falta
+## Instalación en este orden — ¡importante!
 
-La interfaz y el servidor están programados, pero **NO están desplegados, probados de extremo a extremo ni habilitados para cobrar en producción**. El código de comercio `53109637` aparece en la captura del panel de Transbank; ese código **no sustituye la llave secreta de API**. Se requiere integrar y validar el comercio para empezar a cobrar.
+### 1. Base de datos de Supabase (primero)
 
-**Importante:** los productos y precios que había en `app.js` estaban marcados como *ilustrativos y sujetos a cotización*. El sistema exige `WEBPAY_CATALOG_READY=true` para permitir cobros de producción. **No habilitar esta opción sin confirmar precios, stock, compatibilidad, términos del despacho e impuestos aplicables.** El despacho no está incluido en el importe del carrito y debe acordarse por separado.
+Abre **Supabase → SQL Editor → New query**. Pega y ejecuta el archivo:
 
-## Instalación
+`supabase/migrations/20261104_catalogo_admin.sql`
 
-1. Haz una copia de seguridad de tus archivos actuales. En el hosting del dominio `solucarmas.cl`, sube `index.html`, `app.js`, `pago.html`, `pago.js` y `pago-resultado.html` a la carpeta donde está tu tienda (normalmente `public_html`). Mantén todos los demás archivos del sitio intactos, especialmente `tienda.html`, `styles.css`, `pago.css` y `supabase-config.js`.
-2. En Supabase abre **SQL Editor**, ejecuta todo el archivo `supabase/migrations/20261104_webpay_orders.sql` y comprueba que existe la tabla `public.webpay_orders`.
-3. En tu proyecto Supabase despliega la función `webpay` con su contenido desde `supabase/functions/webpay/index.ts`. Con la CLI sería: `supabase functions deploy webpay --no-verify-jwt`. El modo sin JWT es necesario para que Transbank llegue a la URL de retorno. La tabla no está disponible al público gracias al uso de permisos `service_role` únicamente en el servidor.
-4. En **Edge Functions → Secrets** configura `WEBPAY_ENV=integration`, `WEBPAY_SITE_URL=https://solucarmas.cl`, `WEBPAY_COMMERCE_CODE` y `WEBPAY_API_KEY`. Para integración utiliza exclusivamente las credenciales **de prueba** que indica oficialmente Transbank para Webpay Plus Normal. **No uses el código de producción con la clave de integración.** `SUPABASE_URL` y `SUPABASE_SERVICE_ROLE_KEY` deben estar disponibles del lado de las funciones (normalmente son variables automáticas de Supabase).
-5. Verifica que `supabase-config.js` defina `window.SOLUCAR_AUTH_CONFIG` con `url` y `publishableKey` correctos. Esa `publishableKey` sí puede ser pública, a diferencia de `WEBPAY_API_KEY` y de `SUPABASE_SERVICE_ROLE_KEY`.
-6. Prueba el proceso completo **en ambiente de integración**: añadir producto, revisar resumen, pagar en entorno de pruebas, retornar a `pago-resultado.html`, comprobar en base de datos el estado `authorized`. Prueba también rechazo, cancelación, doble retorno y recarga de la página. Revisa importes y que no se borre el carrito ante errores.
-7. **Solo después de validar la integración con Transbank y el catálogo real:** cambia los secretos a `WEBPAY_ENV=production`, `WEBPAY_COMMERCE_CODE=53109637`, `WEBPAY_API_KEY=<tu llave secreta REAL de producción>` y `WEBPAY_CATALOG_READY=true`. Este último control bloquea cobros reales mientras falte confirmación. Solicita la validación de puesta en producción de Transbank antes de vender.
+La migración añade `store_products`, `store_admins`, políticas RLS y el bucket `store-products`. Conserva la tabla `webpay_orders` y los pagos antiguos. Sus 8 productos se agregan inicialmente sin reemplazar cambios existentes.
 
-## Consideraciones de operación
+En **Table Editor**, comprueba que `store_products` contiene ocho productos y sus precios iniciales (todavía referenciales). Si el SQL falla, **no publiques todavía los archivos del sitio**: la tienda de esta versión depende del nuevo catálogo.
 
-- El navegador nunca puede decir qué monto cobrar: el servidor calcula el total desde los identificadores y cantidades, con una lista cerrada de productos.
-- Los datos de tarjeta se introducen únicamente en el formulario de Transbank. No coloques tu clave de API de Transbank en HTML, `app.js`, `pago.js`, `supabase-config.js` ni en GitHub.
-- La confirmación ocurre en la función Edge al recibir el retorno de Webpay, no por un parámetro de URL editable.
-- Los datos del cliente se guardan en una tabla privada. Configura políticas de retención, acceso interno a pedidos, protección contra abusos y el proceso de cumplimiento de órdenes antes de operar ventas reales.
-- Este ejemplo no consulta inventario en tiempo real ni calcula despacho automáticamente, no incluye panel de administración, avisos por correo ni emisión de documentos tributarios. Para ventas activas, integra esos procesos y verifica las condiciones legales y tributarias aplicables.
-- Si la verificación responde `review` o `processing`, **no** autorices un segundo pago hasta comprobar el estado con Transbank.
+### 2. Autorizar al propietario de la cuenta administradora
 
-Documentación oficial: https://transbankdevelopers.com/documentacion/webpay-plus y https://transbankdevelopers.com/referencia/webpay
+**Correo solicitado:** `contacto@solucar.cl` (no confundir con el correo general `contacto@solucarmas.cl`).
+
+En **Authentication → Users**, comprueba que existe ese usuario, que **controla ese buzón** y que verificó su correo. Si no existe, invita al usuario mediante Supabase Auth o crea la cuenta usando tu flujo de registro y haz que confirme el correo. **No compartas contraseñas.**
+
+Luego ejecuta por separado en SQL Editor el archivo:
+
+`supabase/AUTORIZAR_ADMIN.sql`
+
+El script insertará el ID del usuario verificado en `store_admins`. **Debe devolver una fila** en la consulta final. Si devuelve cero, verifica que el correo esté exactamente escrito y confirmado, antes de reintentarlo.
+
+La seguridad real usa el `user_id` autorizado con Supabase Auth y RLS. **Nunca** hay una contraseña de administrador escrita en GitHub.
+
+### 3. Actualizar función Edge `webpay` (antes que la página)
+
+Supabase → Edge Functions → webpay → **Code** → reemplaza con:
+
+`supabase/functions/webpay/index.ts`
+
+Despliega los cambios. Conserva la configuración existente de **Verify JWT = OFF** por el retorno de Transbank. Esta función ahora consulta `store_products`; si no publicas la nueva versión, el servidor seguirá usando sus ocho precios fijos anteriores y no cobrará bien los productos editados.
+
+**No modifiques los secretos de producción solo por instalar el panel.** Durante las pruebas usa `WEBPAY_ENV=integration`, las credenciales oficiales de pruebas y `WEBPAY_CATALOG_READY=false`.
+
+La función sigue validando origen y datos; no expongas `WEBPAY_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY` ni claves privadas en ningún archivo de GitHub.
+
+### 4. Actualizar GitHub Pages
+
+En tu repositorio **SolucarMas / SolucarMas** (rama `main`), crea un respaldo y sube **a la raíz** estos seis archivos de la carpeta principal:
+
+- `index.html` — actualizado; enlace de administración en el pie de página
+- `app.js` — consulta el catálogo vivo de Supabase y conserva la lógica existente de cotizaciones
+- `pago.html` — tarjeta única, nuevo teléfono/comunas y contacto
+- `pago.js` — consulta el catálogo y prepara la transacción
+- `administracion.html` — página del panel
+- `administracion.js` — aplicación del panel
+
+**Mantén sin cambios** `supabase-config.js`, `tienda.html`, `styles.css`, `pago.css`, `pago-resultado.html`, `auth-nav.js`, `tema-v15.css` y las imágenes originales. La carpeta `supabase/` de este ZIP contiene código y migraciones para cargar en Supabase, **no es necesario publicarla en GitHub Pages**.
+
+La tienda existente `tienda.html` debe cargar `app.js`. Si tiene una referencia como `app.js?v=antiguo`, cambia solo el número de versión a `app.js?v=admin-catalogo-20261104` para evitar que el navegador reutilice código viejo (sin tocar el resto de `tienda.html`).
+
+**No** subas el ZIP completo a cPanel: `solucarmas.cl` apunta a GitHub Pages.
+
+### 5. Probar y dar acceso al administrador
+
+Abre `https://solucarmas.cl/administracion.html`.
+
+El titular de `contacto@solucar.cl` inicia sesión con la contraseña de su **cuenta Supabase Auth confirmada**. Debería poder editar un producto, subir una fotografía, guardar y volver a la tienda para comprobar el cambio. Comprueba también que una cuenta normal **no** puede editar ni subir fotografías.
+
+Prueba una compra con un precio editado **en ambiente de integración** y comprueba en `webpay_orders` que el monto corresponde al precio vigente de `store_products`. Prueba también edición de precio con el checkout ya abierto: debe pedir revisar el importe antes de cobrar. Valida pago aprobado, rechazado y cancelado.
+
+## Consideraciones antes de vender realmente
+
+- Los precios iniciales eran **de referencia**, sin despacho. El administrador debe confirmar precios finales, stock, disponibilidad, impuestos, compatibilidad y condiciones del despacho antes de habilitar cobros reales (`WEBPAY_CATALOG_READY=true`).
+- No se ha realizado aquí ningún despliegue remoto ni prueba real de Transbank tras esta modificación. Hasta instalar y probar todos los componentes, no asumas que la nueva versión está activa.
+- El inventario sigue sin descontarse automáticamente; el panel permite **activar/ocultar** productos, no gestionar reservas de stock. Implementa controles de stock, conciliación de pagos, devoluciones y notificaciones antes de operar un volumen importante.
+- Las fotos subidas al bucket público se pueden ver por cualquier persona con la URL; no coloques documentos privados allí.
+- Si un archivo de foto se reemplaza, la foto anterior seguirá almacenada en Storage hasta que un administrador la elimine manualmente desde el panel de Supabase; se evita dar permisos de borrado automático en el navegador.
