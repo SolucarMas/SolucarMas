@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Resultado de tu pago | SOLUCAR MÁS</title>
+  <meta name="description" content="Revisa la confirmación de tu pago de SOLUCAR MÁS mediante Transbank.">
+  <style>
+    :root{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color-scheme:light;--bg:#f9f7fa;--surface:#fff;--text:#101e32;--muted:#65748a;--line:#e9e0e5;--accent:#cb1b3a}
+    [data-theme=dark]{color-scheme:dark;--bg:#130f19;--surface:#261d2a;--text:#f8faff;--muted:#aebbd0;--line:#50404c}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);line-height:1.55}header{background:#09233f;color:#fff;padding:20px 24px}header a{color:#fff;text-decoration:none;font-weight:900;letter-spacing:.08em}
+    main{min-height:80vh;display:grid;place-items:center;padding:40px 18px}.card{width:min(600px,100%);padding:38px;border-radius:24px;background:var(--surface);border:1px solid var(--line);box-shadow:0 15px 50px #00000012}
+    .stamp{font-size:.75rem;font-weight:900;letter-spacing:.14em;color:var(--accent);text-transform:uppercase;margin:0 0 12px}h1{font-size:clamp(1.8rem,5vw,2.65rem);line-height:1.1;margin:0 0 15px;letter-spacing:-.05em}p{color:var(--muted)}.detail{margin:25px 0;padding:20px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}.detail div{display:flex;justify-content:space-between;gap:16px;margin:8px 0;overflow-wrap:anywhere}.detail strong{word-break:break-all;text-align:right}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:28px}.btn{display:inline-flex;justify-content:center;align-items:center;min-height:45px;padding:12px 18px;border-radius:12px;font-size:.88rem;font-weight:800;text-decoration:none;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--text)}.primary{border:0;color:#fff;background:linear-gradient(110deg,#b5102b,#ed3955)}
+    .note{font-size:.83rem;color:var(--muted)}.status-approved{color:#087b50}.status-rejected{color:#d12448}.status-pending{color:#9c6412}
+    @media(max-width:520px){.card{padding:27px 20px}}
+  </style>
+</head>
+<body>
+  <header><a href="index.html">SOLUCAR MÁS</a></header>
+  <main><section class="card" aria-live="polite">
+    <p class="stamp">Transbank · Webpay Plus</p>
+    <h1 id="resultTitle">Verificando tu pago…</h1>
+    <p id="resultMessage">Consultando el estado real del pedido con SOLUCAR MÁS. La página no confirma pagos basándose en la dirección del navegador.</p>
+    <div class="detail" id="receiptDetails" hidden>
+      <div><span>Orden</span><strong id="receiptOrder">—</strong></div>
+      <div><span>Total de productos</span><strong id="receiptAmount">—</strong></div>
+      <div><span>Estado</span><strong id="receiptStatus">—</strong></div>
+    </div>
+    <p class="note">¿Tienes dudas? Escríbenos a <a href="mailto:contacto@solucarmas.cl">contacto@solucarmas.cl</a> e indica el número de orden. No vuelvas a pagar si el estado es incierto.</p>
+    <div class="actions"><a class="btn primary" href="index.html">Volver al inicio</a><a class="btn" href="tienda.html">Ir a la tienda</a><button class="btn" id="retryButton" type="button">Consultar nuevamente</button></div>
+  </section></main>
+  <script src="supabase-config.js?v=webpay-20261104"></script>
+  <script>
+  (() => {
+    'use strict';
+    try { const theme = localStorage.getItem('solucar-theme'); if (theme === 'dark') document.documentElement.dataset.theme = theme; } catch {}
+    const $ = s => document.querySelector(s);
+    const id = new URLSearchParams(location.search).get('pedido') || '';
+    const cfg = window.SOLUCAR_AUTH_CONFIG || {};
+    const cash = n => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(n);
+    const statuses = {
+      authorized: ['¡Pago aprobado!', 'Transbank aprobó y SOLUCAR MÁS verificó tu transacción. Conserva este número de orden para futuras consultas.', 'approved', 'Aprobado'],
+      rejected: ['El pago fue rechazado', 'Transbank no aprobó la operación. Revisa tu medio de pago antes de intentar nuevamente.', 'rejected', 'Rechazado'],
+      aborted: ['Pago cancelado o vencido', 'No se completó el pago. No hemos marcado tu pedido como pagado.', 'rejected', 'No realizado'],
+      pending: ['Pago pendiente de confirmación', 'Estamos esperando el retorno de Transbank. Si ya pagaste, consulta nuevamente antes de intentarlo otra vez.', 'pending', 'Pendiente'],
+      processing: ['Verificando con Transbank', 'La transacción está siendo confirmada. No vuelvas a pagar mientras se verifica.', 'pending', 'En revisión'],
+      review: ['Pago pendiente de revisión', 'No pudimos determinar con seguridad el resultado del pago. Contacta a la tienda con tu número de orden antes de reintentar.', 'pending', 'Revisión manual'],
+      creating: ['Pago aún no iniciado', 'Todavía no se ha iniciado correctamente el pago.', 'pending', 'No iniciado'],
+      failed: ['No se pudo iniciar el pago', 'La operación no llegó a una confirmación de cobro.', 'rejected', 'Fallido'],
+    };
+    function message(title, detail, kind='pending') {
+      $('#resultTitle').textContent = title;
+      $('#resultTitle').className = 'status-' + kind;
+      $('#resultMessage').textContent = detail;
+    }
+    function clearPurchasedCart(pedido) {
+      try {
+        const pending = JSON.parse(sessionStorage.getItem('solucar-webpay-orden-pendiente') || 'null');
+        if (pending?.pedido === pedido && JSON.stringify(JSON.parse(localStorage.getItem('solucar-cart-v3') || '{}')) === JSON.stringify(pending.cart)) {
+          localStorage.removeItem('solucar-cart-v3');
+          sessionStorage.removeItem('solucar-webpay-orden-pendiente');
+        }
+      } catch {}
+    }
+    async function load() {
+      if (!/^[0-9a-f-]{36}$/i.test(id)) return message('No encontramos la referencia del pago', 'Vuelve a tu carrito o consulta con la tienda si ya realizaste un pago.', 'rejected');
+      if (!cfg.url || !cfg.publishableKey) return message('Falta configurar la consulta de pagos', 'Comunícate con SOLUCAR MÁS para verificar el resultado.', 'pending');
+      message('Verificando tu pago…', 'Consultando el estado del pedido con el servidor de la tienda.');
+      try {
+        const response = await fetch(cfg.url.replace(/\/$/, '') + '/functions/v1/webpay?accion=estado&pedido=' + encodeURIComponent(id), { headers: { apikey: cfg.publishableKey }, cache: 'no-store' });
+        const data = await response.json();
+        if (!response.ok || !data.ok) throw new Error(data.error || 'No encontramos este pedido.');
+        const [title, detail, kind, statusLabel] = statuses[data.estado] || statuses.review;
+        message(title, detail, kind);
+        $('#receiptDetails').hidden = false;
+        $('#receiptOrder').textContent = data.orden;
+        $('#receiptAmount').textContent = cash(data.total);
+        $('#receiptStatus').textContent = statusLabel;
+        if (data.estado === 'authorized') clearPurchasedCart(data.pedido);
+      } catch (error) {
+        message('No se pudo verificar el resultado', 'No podemos asegurar que la transacción haya sido aprobada. ' + (error.message || '') + ' Consulta con la tienda antes de volver a pagar.', 'pending');
+      }
+    }
+    $('#retryButton').addEventListener('click', load);
+    load();
+  })();
+  </script>
+</body>
+</html>

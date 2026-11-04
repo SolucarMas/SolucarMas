@@ -1,189 +1,228 @@
-// SOLUCAR MÁS · Supabase Edge Function: enviar-cotizacion
-// Secretos REQUERIDOS: RESEND_API_KEY y QUOTE_FROM_EMAIL.
-// Consulta gratuita de datos básicos del vehículo vía AutoRiesgo (endpoint público /report/agent/lookup).
-// No se envía ni se almacena información de propietarios. Respetar límites y términos de AutoRiesgo.
-// El dominio del remitente debe estar verificado en Resend.
-const allowedOrigins = new Set(['https://solucarmas.cl','https://www.solucarmas.cl']);
-const labels = ['nombre','correo','telefono','patente','comuna','necesidad'] as const;
-const titles = ['Nombre y apellido','Correo electrónico','Teléfono','Patente','Comuna','Necesidad / descripción'];
-const json=(data:unknown,status=200,origin='https://solucarmas.cl')=>new Response(JSON.stringify(data),{
-  status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',
-  'Access-Control-Allow-Origin':origin,'Vary':'Origin',
-  'Access-Control-Allow-Headers':'content-type, apikey, authorization, x-client-info, x-supabase-api-version',
-  'Access-Control-Allow-Methods':'POST, OPTIONS'}});
-const htmlEscape=(v:string)=>v.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]||c));
-const safeCSV=(v:string)=>{
-  // Evita inyección de fórmulas al abrir CSV en Excel/LibreOffice.
-  const normalized=v.replace(/\r\n?/g,'\n');
-  const val=/^\s*[=+@\-\t\r]/.test(normalized)?"'"+normalized:normalized;
-  return '"'+val.replace(/"/g,'""')+'"';
+// SOLUCAR MÁS | Webpay Plus (Transbank API v1.2)
+// Supabase Edge Function pública: desplegar con --no-verify-jwt para aceptar el retorno de Transbank.
+// La llave de producción y la service_role nunca se envían al navegador.
+import { createClient } from 'npm:@supabase/supabase-js@2';
+
+type Item = { id: string; nombre: string; cantidad: number; precio: number; subtotal: number };
+type Order = {
+  id: string; buy_order: string; session_id: string; token_ws: string | null;
+  amount_clp: number; status: string; items: Item[];
 };
-const toBase64=(bytes:Uint8Array)=>{
-  let out='';for(let i=0;i<bytes.length;i+=8192)out+=String.fromCharCode(...bytes.subarray(i,i+8192));
-  return btoa(out);
+const CATALOG: Record<string, { name: string; price: number }> = {
+  'filter-oil': { name: 'Filtro de aceite universal', price: 8900 },
+  'filter-air': { name: 'Filtro de aire para motor', price: 12900 },
+  'oil-5w30': { name: 'Aceite de motor sintético 5W-30 · 4 L', price: 29900 },
+  'oil-15w40': { name: 'Aceite multigrado 15W-40 · 4 L', price: 25900 },
+  pads: { name: 'Pastillas de freno delanteras', price: 27900 },
+  bulb: { name: 'Ampolleta halógena H7', price: 6900 },
+  wipers: { name: 'Limpiaparabrisas · unidad', price: 9900 },
+  coolant: { name: 'Refrigerante de motor · 1 L', price: 7500 },
 };
-// SOLO datos técnicos útiles para cotizar repuestos. No pedir ni guardar datos del propietario.
-type VehicleResult={ estado:string; datos:Record<string,string> };
-// Obtener exclusivamente datos técnicos de identificación: no leer ni copiar el propietario,
-// RUT, informes de riesgo, multas ni enlaces de compra que también podrían llegar en el JSON.
-const cleanField=(value:unknown,max=90):string=>
-  typeof value==='string'||typeof value==='number' ? String(value).trim().slice(0,max):'';
-const normalizePlate=(value:string):string=>{
-  const plate=value.toUpperCase().replace(/[^A-Z0-9]/g,'');
-  // AutoRiesgo admite abreviaturas de algunas patentes antiguas (5 caracteres).
-  if(/^[A-Z]{3}[0-9]{2}$/.test(plate))return plate.slice(0,3)+'0'+plate.slice(3);
-  return plate;
+const env = (name: string) => Deno.env.get(name)?.trim() || '';
+const site = env('WEBPAY_SITE_URL') || 'https://solucarmas.cl';
+const siteOrigin = new URL(site).origin;
+const supabaseUrl = env('SUPABASE_URL');
+const supabaseKey = env('SUPABASE_SERVICE_ROLE_KEY');
+const admin = createClient(supabaseUrl, supabaseKey, { auth: { persistSession: false } });
+const environment = env('WEBPAY_ENV') === 'production' ? 'production' : 'integration';
+const host = environment === 'production'
+  ? 'https://webpay3g.transbank.cl'
+  : 'https://webpay3gint.transbank.cl';
+const transactionUrl = `${host}/rswebpaytransaction/api/webpay/v1.2/transactions`;
+const commerceCode = env('WEBPAY_COMMERCE_CODE');
+const apiKey = env('WEBPAY_API_KEY');
+const headersTBK = {
+  'Tbk-Api-Key-Id': commerceCode,
+  'Tbk-Api-Key-Secret': apiKey,
+  'Content-Type': 'application/json',
 };
-async function lookupVehicle(plate:string):Promise<VehicleResult>{
-  const controller=new AbortController();
-  const timeout=setTimeout(()=>controller.abort(),6500);
-  try{
-    const url='https://api.autoriesgo.cl/api/v1/report/agent/lookup?patente='+encodeURIComponent(plate);
-    const response=await fetch(url,{
-      method:'GET',headers:{'Accept':'application/json'},signal:controller.signal
+const json = (data: unknown, status = 200, extra: HeadersInit = {}) => new Response(JSON.stringify(data), {
+  status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', ...extra },
+});
+const allowedOrigins = new Set([siteOrigin, 'https://www.solucarmas.cl']);
+if (environment !== 'production') { allowedOrigins.add('http://localhost:5500'); allowedOrigins.add('http://127.0.0.1:5500'); }
+const cors = (request: Request): HeadersInit => {
+  const origin = request.headers.get('origin') || '';
+  return allowedOrigins.has(origin)
+    ? { 'Access-Control-Allow-Origin': origin, 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Allow-Headers': 'apikey, authorization, content-type, x-client-info', Vary: 'Origin' }
+    : { Vary: 'Origin' };
+};
+const uuidOk = (s: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
+const tokenOk = (s: string) => /^[a-zA-Z0-9._-]{20,256}$/.test(s);
+const orderOk = (s: string) => /^[a-zA-Z0-9-]{5,26}$/.test(s);
+const plain = (v: unknown, max: number) => String(v ?? '').trim().slice(0, max);
+const approved = (result: Record<string, unknown>, row: Order) =>
+  result.status === 'AUTHORIZED' && result.response_code === 0 &&
+  result.buy_order === row.buy_order && result.session_id === row.session_id &&
+  Number(result.amount) === row.amount_clp;
+const responseSubset = (r: Record<string, unknown>) => ({
+  status: r.status, response_code: r.response_code, buy_order: r.buy_order,
+  session_id: r.session_id, amount: r.amount, authorization_code: r.authorization_code,
+  transaction_date: r.transaction_date, payment_type_code: r.payment_type_code,
+  installments_number: r.installments_number, vci: r.vci,
+  // Los únicos dígitos de tarjeta admitidos son los últimos que entregue Transbank (dato enmascarado).
+  card_detail: { card_number: (r.card_detail as Record<string, unknown> | undefined)?.card_number ?? null },
+});
+async function tbk(method: string, url: string, payload?: unknown) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 14000);
+  try {
+    const res = await fetch(url, {
+      method, headers: headersTBK, body: payload ? JSON.stringify(payload) : undefined,
+      signal: controller.signal,
     });
-    if(response.status===404 || response.status===422)
-      return {estado:'AutoRiesgo no encontró información para esta patente; verificar con el cliente',datos:{}};
-    if(response.status===429){
-      // No reintentar hasta vencer Retry-After; un error externo jamás bloquea la cotización.
-      const retryAfter=response.headers.get('Retry-After');
-      console.warn('AutoRiesgo: límite alcanzado; Retry-After:',retryAfter);
-      return {estado:'AutoRiesgo alcanzó su límite de consultas gratuitas; pendiente de verificación',datos:{}};
-    }
-    if(!response.ok){
-      console.warn('AutoRiesgo no respondió correctamente; HTTP',response.status);
-      return {estado:'AutoRiesgo temporalmente no disponible; pendiente de verificación',datos:{}};
-    }
-    // El servicio publica { patente, vehicle_data:{ make,model,year,type,... }, purchase_full_report:{...} }.
-    const raw:unknown=await response.json();
-    if(!raw||typeof raw!=='object'||Array.isArray(raw))
-      return {estado:'Sin datos técnicos disponibles en AutoRiesgo',datos:{}};
-    const payload=raw as Record<string,unknown>;
-    const vehicleData=payload.vehicle_data;
-    if(!vehicleData||typeof vehicleData!=='object'||Array.isArray(vehicleData))
-      return {estado:'AutoRiesgo no encontró características del vehículo',datos:{}};
-    const obj=vehicleData as Record<string,unknown>;
-    // Compatibilidad con respuestas que anidan características en vehicle_data.data.
-    const nested=obj.data&&typeof obj.data==='object'&&!Array.isArray(obj.data)
-      ? obj.data as Record<string,unknown> : {};
-    const field=(...names:string[])=>{
-      for(const name of names){const a=cleanField(obj[name]);if(a)return a;const b=cleanField(nested[name]);if(b)return b;}
-      return '';
-    };
-    // VIN / chasis: puede estar en vehicle_data, vehicle_data.data o en una
-    // sección técnica anidada. No buscar dentro de owner, informes o compras.
-    const asObject=(value:unknown):Record<string,unknown>=>
-      value&&typeof value==='object'&&!Array.isArray(value) ? value as Record<string,unknown> : {};
-    const vinSources=[obj,nested,asObject(obj.vehicle),asObject(obj.specs),
-      asObject(obj.identification),asObject(nested.vehicle),asObject(nested.specs),
-      asObject(nested.identification)];
-    const vinNames=['vin','VIN','chassis','chasis','chassis_number','chassisNumber',
-      'chasis_number','chasisNumber','numero_chasis','numeroChasis','nro_chasis',
-      'num_chasis','numero_de_chasis','vin_number','vinNumber','nroVin','nro_vin'];
-    const validVin=(value:unknown):string=>{
-      if(typeof value!=='string'&&typeof value!=='number')return '';
-      const raw=String(value).trim().toUpperCase();
-      if(!raw||/^(N\/?A|SIN (DATO|INFORMACI[ÓO]N)|NO DISPONIBLE|NULL|UNKNOWN|PENDIENTE|\-+)$/i.test(raw))return '';
-      // El chasis puede no tener 17 caracteres en vehículos antiguos.
-      const cleaned=raw.replace(/[\s.\-]/g,'');
-      return /^[A-Z0-9]{8,25}$/.test(cleaned) ? cleaned : '';
-    };
-    let vin='';
-    for(const source of vinSources){
-      for(const name of vinNames){
-        vin=validVin(source[name]);
-        if(vin)break;
-      }
-      if(vin)break;
-    }
-    const pairs:[string,string][]=[
-      ['Marca',field('make','marca')],
-      ['Modelo',field('model','modelo')],
-      ['Año',field('year','anio','año')],
-      ['Tipo de vehículo',field('type','vehicle_type','tipo')],
-      // Si no hay VIN válido, no se genera esta fila ni en el email ni en el CSV.
-      ['Chasis (VIN)',vin]
-    ];
-    const datos=Object.fromEntries(pairs.filter(([,value])=>value));
-    return Object.keys(datos).length
-      ? {estado:'Consulta básica de AutoRiesgo realizada (información referencial)',datos}
-      : {estado:'AutoRiesgo no devolvió datos técnicos verificables',datos:{}};
-  }catch(error){
-    console.warn('No fue posible consultar AutoRiesgo:',String(error));
-    return {estado:'Consulta gratuita no disponible; pendiente de verificación',datos:{}};
-  }finally{clearTimeout(timeout)}
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(`Transbank HTTP ${res.status}`);
+    return body as Record<string, unknown>;
+  } finally { clearTimeout(timeout); }
 }
-Deno.serve(async(req)=>{
-  const origin=req.headers.get('origin')||'';
-  if(origin&&!allowedOrigins.has(origin))return json({ok:false,error:'Origen no autorizado.'},403,'https://solucarmas.cl');
-  const cors=origin||'https://solucarmas.cl';
-  if(req.method==='OPTIONS')return json({},200,cors);
-  if(req.method==='GET')return json({ok:true,service:'enviar-cotizacion',configured:Boolean(Deno.env.get('RESEND_API_KEY')&&Deno.env.get('QUOTE_FROM_EMAIL'))},200,cors);
-  if(req.method!=='POST')return json({ok:false,error:'Método no permitido.'},405,cors);
-  if(Number(req.headers.get('content-length')||0)>16000)return json({ok:false,error:'Solicitud demasiado grande.'},413,cors);
-  let input:Record<string,unknown>;
-  try{input=await req.json();if(!input||typeof input!=='object'||Array.isArray(input))throw Error()}catch{return json({ok:false,error:'Solicitud inválida.'},400,cors)}
-  if(input.website)return json({ok:true,reference:'RECIBIDA'},200,cors); // Honeypot: bots, no envía correo.
-  const data:Record<string,string>={};
-  for(const key of labels){if(typeof input[key]!=='string')return json({ok:false,error:'Los datos de la cotización están incompletos.'},400,cors);data[key]=(input[key] as string).trim()}
-  if(!data.nombre||!data.correo||!data.telefono||!data.patente||!data.necesidad)return json({ok:false,error:'Completa nombre, correo, teléfono, patente y descripción.'},400,cors);
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.correo)||data.correo.length>254)return json({ok:false,error:'Correo inválido.'},400,cors);
-  if(!/^[\d +()\-.]{7,25}$/.test(data.telefono))return json({ok:false,error:'Teléfono inválido.'},400,cors);
-  data.patente=normalizePlate(data.patente);
-  if(!/^[A-Z0-9]{6}$/.test(data.patente))return json({ok:false,error:'La patente indicada no tiene un formato válido.'},400,cors);
-  for(const key of labels){if(data[key].length>(key==='necesidad'?2000:160))return json({ok:false,error:'Uno de los campos supera el límite permitido.'},400,cors)}
-  // Protección opcional recomendada para producción: Cloudflare Turnstile (si se configura, es obligatoria).
-  const turnstileSecret=Deno.env.get('TURNSTILE_SECRET_KEY');
-  if(turnstileSecret){
-    if(typeof input.turnstileToken!=='string'||!input.turnstileToken)return json({ok:false,error:'Completa la verificación antispam.'},400,cors);
-    const check=await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify',{method:'POST',body:new URLSearchParams({secret:turnstileSecret,response:input.turnstileToken})});
-    const result=await check.json();if(!result.success)return json({ok:false,error:'No se pudo validar la verificación antispam.'},403,cors);
-  }
-  const apiKey=Deno.env.get('RESEND_API_KEY');const from=Deno.env.get('QUOTE_FROM_EMAIL');
-  if(!apiKey||!from)return json({ok:false,error:'Falta configurar el servicio de correo en Supabase.'},503,cors);
-  const now=new Date();const reference='COT-'+now.toISOString().replace(/[-:.TZ]/g,'').slice(0,14)+'-'+crypto.randomUUID().slice(0,6).toUpperCase();
-  // Consulta gratuita: características básicas, sin datos de propietarios.
-  // Nunca bloquear el envío si AutoRiesgo está caído, no encuentra patente o limita la cuota.
-  const vehicle=await lookupVehicle(data.patente);
-  const rows=[['Referencia',reference],['Fecha y hora (UTC)',now.toISOString()],
-    ...labels.map((k,i)=>[titles[i],data[k]]),
-    ['Consulta de datos del vehículo',vehicle.estado],
-    ...Object.entries(vehicle.datos).map(([key,value])=>['Vehículo · '+key,value])
-  ];
-  const csv='\uFEFF' + rows.map(r=>r.map(safeCSV).join(';')).join('\r\n')+'\r\n';
-  const attachment=toBase64(new TextEncoder().encode(csv));
-  const tr=rows.map(([label,value])=>`<tr><td style="padding:10px;border-bottom:1px solid #e0e7f0"><strong>${htmlEscape(label)}</strong></td><td style="padding:10px;border-bottom:1px solid #e0e7f0;white-space:pre-wrap">${htmlEscape(value)}</td></tr>`).join('');
-  const mail={
-    from, to:['contacto@solucarmas.cl'],reply_to:data.correo,
-    subject:`Nueva cotización SOLUCAR MÁS · ${reference}`,
-    html:`<div style="font-family:Arial,sans-serif;color:#10223a"><div style="padding:4px 0 18px"><img src="https://solucarmas.cl/assets/logo-claro.png" alt="SOLUCAR MÁS" style="display:block;max-width:220px;height:auto"><div style="font-size:12px;letter-spacing:1px;color:#51657c;padding-top:8px">SOLUCIONES AUTOMOTRICES</div></div><h2 style="margin:0 0 12px;color:#153c70">Nueva solicitud de cotización</h2><p>Un cliente solicitó una cotización indicando su patente. Se adjunta la planilla CSV para abrir en Excel. Los datos técnicos del vehículo, cuando estén disponibles, proceden de AutoRiesgo y son referenciales. Verifica compatibilidad antes de vender repuestos. Si faltan datos, confírmalos con el cliente o consúltalos manualmente en https://autoriesgo.cl/.</p><table cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;max-width:750px">${tr}</table><p>Responde a este correo para contactar al cliente.</p></div>`,
-    text:rows.map(([k,v])=>k+': '+v).join('\n')+'\n\nConsulta manual referencial: https://autoriesgo.cl/',
-    attachments:[{filename:`cotizacion-${reference}.csv`,content:attachment}]
+async function fetchOrder(column: 'id' | 'token_ws' | 'buy_order', value: string): Promise<Order | null> {
+  const { data, error } = await admin.from('webpay_orders').select('id,buy_order,session_id,token_ws,amount_clp,status,items').eq(column, value).maybeSingle();
+  if (error) throw error;
+  return (data as Order | null);
+}
+async function updateOrder(id: string, values: Record<string, unknown>) {
+  const { error } = await admin.from('webpay_orders').update({ ...values, updated_at: new Date().toISOString() }).eq('id', id);
+  if (error) throw error;
+}
+function landing(orderId?: string, error?: string): Response {
+  const url = new URL('pago-resultado.html', siteOrigin + '/');
+  if (orderId) url.searchParams.set('pedido', orderId);
+  else url.searchParams.set('error', error || 'no-reconocido');
+  return new Response(null, { status: 303, headers: { Location: url.toString(), 'Cache-Control': 'no-store' } });
+}
+async function start(req: Request): Promise<Response> {
+  const responseHeaders = cors(req);
+  if (!allowedOrigins.has(req.headers.get('origin') || '')) return json({ ok: false, error: 'Origen no autorizado.' }, 403, responseHeaders);
+  if (!commerceCode || !apiKey) return json({ ok: false, error: 'El comercio aún no configuró las credenciales de Webpay.' }, 503, responseHeaders);
+  // Protección intencional: los precios actuales son ilustrativos y NO están confirmados como precios comerciales.
+  if (environment === 'production' && env('WEBPAY_CATALOG_READY') !== 'true')
+    return json({ ok: false, error: 'La tienda aún debe confirmar precios, stock y condiciones de despacho antes de activar cobros reales.' }, 503, responseHeaders);
+  let payload: Record<string, unknown>;
+  try { payload = await req.json(); } catch { return json({ ok: false, error: 'Solicitud inválida.' }, 400, responseHeaders); }
+  const customer = (payload.customer && typeof payload.customer === 'object') ? payload.customer as Record<string, unknown> : {};
+  const buyer = {
+    nombre: plain(customer.nombre, 100), correo: plain(customer.correo, 160),
+    telefono: plain(customer.telefono, 40), comuna: plain(customer.comuna, 110),
+    notas: plain(customer.notas, 1200),
   };
-  try{
-    const response=await fetch('https://api.resend.com/emails',{method:'POST',headers:{Authorization:`Bearer ${apiKey}`,'Content-Type':'application/json'},body:JSON.stringify(mail)});
-    if(!response.ok){console.error('Resend error:',response.status,await response.text());return json({ok:false,error:'El servicio de correo rechazó la solicitud. Inténtalo más tarde.'},502,cors)}
-    // Confirmación independiente al cliente: solo después de que Resend acepte el correo interno.
-    // Si el mensaje al cliente falla, la cotización sigue recibida y se registra el fallo.
-    let customer_email_sent=false;
-    try {
-      const firstName=htmlEscape(data.nombre.split(/\s+/)[0]||'');
-      const vinRow=vehicle.datos['Chasis (VIN)']?`<tr><td style="font-size:13px;color:#52657a">VIN / chasis</td><td style="font-size:14px;font-weight:bold;text-align:right;color:#142b48">${htmlEscape(vehicle.datos['Chasis (VIN)'])}</td></tr>`:'';
-      const confirmation={
-        from,
-        to:[data.correo],
-        reply_to:'contacto@solucarmas.cl',
-        subject:`SOLUCAR MÁS | Tu solicitud ha sido confirmada · ${reference}`,
-        html:`<!doctype html><html lang="es"><head><meta charset="utf-8"></head><body style="margin:0;background:#edf3fa;font-family:Arial,Helvetica,sans-serif;color:#0d2036"><table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:#edf3fa;padding:30px 12px"><tr><td align="center"><table width="580" role="presentation" cellpadding="0" cellspacing="0" style="max-width:580px;width:100%;border-collapse:collapse;background:#fff;border-radius:14px;overflow:hidden"><tr><td style="background:#091b30;padding:24px 30px;color:#fff"><img src="https://solucarmas.cl/assets/logo-oscuro.png" alt="SOLUCAR MÁS" style="display:block;max-width:215px;height:auto"><div style="font-size:11px;letter-spacing:1.4px;color:#c9d6e5;padding-top:8px">SOLUCIONES AUTOMOTRICES</div></td></tr><tr><td style="padding:34px 30px"><div style="color:#1671d1;font-size:12px;font-weight:800;letter-spacing:1px">SOLICITUD RECIBIDA</div><h1 style="font-size:28px;line-height:1.2;color:#10233c;margin:14px 0 16px">Tu solicitud ha sido confirmada.</h1><p style="font-size:16px;line-height:1.7">Hola ${firstName},</p><p style="line-height:1.7;color:#4b5c70">Recibimos correctamente tu solicitud de cotización. Nuestro equipo revisará la información de tu vehículo y los repuestos o insumos que necesitas para responderte a la brevedad.</p><table width="100%" cellpadding="12" cellspacing="0" role="presentation" style="background:#f3f6fa;border-radius:10px;margin:24px 0"><tr><td style="font-size:13px;color:#52657a">Número de solicitud</td><td style="font-size:14px;font-weight:bold;text-align:right;color:#142b48">${htmlEscape(reference)}</td></tr><tr><td style="font-size:13px;color:#52657a">Patente</td><td style="font-size:14px;font-weight:bold;text-align:right;color:#142b48">${htmlEscape(data.patente)}</td></tr>${vinRow}</table><p style="line-height:1.7;color:#4b5c70">Esta confirmación acredita la recepción de la solicitud, <strong>no la disponibilidad ni el precio final</strong> de los productos.</p><p style="line-height:1.7;color:#4b5c70">¿Necesitas complementar tu solicitud? Escríbenos a <a href="mailto:contacto@solucarmas.cl" style="color:#145fb5">contacto@solucarmas.cl</a> e indica tu número de solicitud.</p></td></tr><tr><td style="background:#091b30;color:#d6e2ef;text-align:center;font-size:12px;padding:20px">SOLUCAR MÁS · Soluciones automotrices · <a href="https://solucarmas.cl" style="color:#fff">solucarmas.cl</a></td></tr></table></td></tr></table></body></html>`,
-        text:`Tu solicitud ha sido confirmada.\n\nHola ${data.nombre},\nRecibimos correctamente tu solicitud de cotización. Nuestro equipo revisará los datos y te responderá a la brevedad.\n\nN° de solicitud: ${reference}\nPatente: ${data.patente}${vehicle.datos['Chasis (VIN)']?`\nVIN / chasis: ${vehicle.datos['Chasis (VIN)']}`:''}\n\nLa recepción no implica confirmación de precios o disponibilidad.\nContacto: contacto@solucarmas.cl`
-      };
-      const clientResponse=await fetch('https://api.resend.com/emails',{
-        method:'POST',headers:{Authorization:`Bearer ${apiKey}`,'Content-Type':'application/json'},body:JSON.stringify(confirmation)
-      });
-      customer_email_sent=clientResponse.ok;
-      if(!customer_email_sent)console.error('Confirmación cliente rechazada:',clientResponse.status,await clientResponse.text());
-    }catch(customerError){console.error('No se pudo enviar confirmación al cliente:',customerError)}
-    return json({ok:true,reference,customer_email_sent,vehicle_lookup:vehicle.estado,
-      ...(vehicle.datos['Chasis (VIN)']?{vin:vehicle.datos['Chasis (VIN)']}:{})},200,cors);
-  }catch(error){console.error('Error de envío:',error);return json({ok:false,error:'No fue posible conectar con el servicio de correo.'},502,cors)}
+  if (buyer.nombre.length < 4 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(buyer.correo)
+      || buyer.telefono.length < 7 || buyer.comuna.length < 2)
+    return json({ ok: false, error: 'Completa tus datos de contacto correctamente.' }, 400, responseHeaders);
+  if (!Array.isArray(payload.items) || !payload.items.length || payload.items.length > 8)
+    return json({ ok: false, error: 'Carrito inválido.' }, 400, responseHeaders);
+  const ids = new Set<string>();
+  const items: Item[] = [];
+  for (const raw of payload.items) {
+    if (!raw || typeof raw !== 'object') return json({ ok: false, error: 'Producto inválido.' }, 400, responseHeaders);
+    const data = raw as Record<string, unknown>;
+    const id = typeof data.id === 'string' ? data.id : '';
+    const qty = data.qty;
+    if (!CATALOG[id] || ids.has(id) || !Number.isInteger(qty) || Number(qty) < 1 || Number(qty) > 20)
+      return json({ ok: false, error: 'Revisa los productos y cantidades.' }, 400, responseHeaders);
+    ids.add(id);
+    items.push({ id, nombre: CATALOG[id].name, cantidad: Number(qty), precio: CATALOG[id].price, subtotal: Number(qty) * CATALOG[id].price });
+  }
+  const amount = items.reduce((sum, item) => sum + item.subtotal, 0);
+  if (amount <= 0 || amount > 5000000) return json({ ok: false, error: 'Monto de compra no permitido.' }, 400, responseHeaders);
+  const buyOrder = `SM${Date.now().toString(36).toUpperCase()}${crypto.randomUUID().replaceAll('-', '').slice(0, 8).toUpperCase()}`;
+  const sessionId = crypto.randomUUID();
+  const { data, error } = await admin.from('webpay_orders')
+    .insert({ buy_order: buyOrder, session_id: sessionId, amount_clp: amount,
+      customer: buyer, items, status: 'creating', environment })
+    .select('id').single();
+  if (error || !data?.id) return json({ ok: false, error: 'No se pudo registrar el pedido.' }, 503, responseHeaders);
+  try {
+    const returnUrl = `${supabaseUrl}/functions/v1/webpay?accion=retorno`;
+    const payment = await tbk('POST', transactionUrl, {
+      buy_order: buyOrder, session_id: sessionId, amount, return_url: returnUrl,
+    });
+    const token = String(payment.token ?? '');
+    const url = String(payment.url ?? '');
+    if (!tokenOk(token) || !url.startsWith(`${host}/`)) throw new Error('Respuesta de Transbank inválida');
+    await updateOrder(data.id, { token_ws: token, status: 'pending' });
+    return json({ ok: true, url, token, pedido: data.id }, 200, responseHeaders);
+  } catch (e) {
+    console.error('webpay iniciar:', e);
+    await updateOrder(data.id, { status: 'failed' });
+    return json({ ok: false, error: 'No se pudo iniciar Webpay. No se realizó ningún cobro.' }, 502, responseHeaders);
+  }
+}
+async function callback(request: Request): Promise<Response> {
+  const url = new URL(request.url);
+  let params = url.searchParams;
+  if (request.method === 'POST') {
+    const raw = await request.text();
+    if (raw.length > 4096) return landing(undefined, 'datos-invalidos');
+    const incoming = new URLSearchParams(raw);
+    for (const [k, v] of incoming) params.set(k, v);
+  }
+  const token = params.get('token_ws') || '';
+  const abortedToken = params.get('TBK_TOKEN') || '';
+  const abortOrder = params.get('TBK_ORDEN_COMPRA') || '';
+  const abortSession = params.get('TBK_ID_SESION') || params.get('TBK_ID_SESSION') || '';
+  if (!commerceCode || !apiKey) return landing(undefined, 'no-configurado');
+  if (token && abortedToken) return landing(undefined, 'retorno-no-validado');
+  if (tokenOk(token)) {
+    const row = await fetchOrder('token_ws', token);
+    if (!row) return landing(undefined, 'pedido-no-reconocido');
+    if (['authorized', 'rejected', 'aborted', 'review', 'failed'].includes(row.status)) return landing(row.id);
+    // Marcar processing de forma condicional evita confirmar dos veces el mismo token.
+    const { data: locked, error } = await admin.from('webpay_orders')
+      .update({ status: 'processing', updated_at: new Date().toISOString() })
+      .eq('id', row.id).eq('status', 'pending').select('id');
+    if (error || !locked?.length) return landing(row.id);
+    let result: Record<string, unknown>;
+    try { result = await tbk('PUT', `${transactionUrl}/${encodeURIComponent(token)}`); }
+    catch (e) {
+      console.error('Webpay commit incierto; verificando estado:', e);
+      try { result = await tbk('GET', `${transactionUrl}/${encodeURIComponent(token)}`); }
+      catch {
+        await updateOrder(row.id, { status: 'review' });
+        return landing(row.id);
+      }
+    }
+    const matches = result.buy_order === row.buy_order && result.session_id === row.session_id && Number(result.amount) === row.amount_clp;
+    const status = !matches ? 'review' : approved(result, row) ? 'authorized' : 'rejected';
+    await updateOrder(row.id, { status, tbk_response: responseSubset(result), finished_at: new Date().toISOString() });
+    return landing(row.id);
+  }
+  if (tokenOk(abortedToken)) {
+    const row = await fetchOrder('token_ws', abortedToken);
+    if (!row) return landing(undefined, 'pedido-no-reconocido');
+    if (['pending', 'creating'].includes(row.status)) await updateOrder(row.id, { status: 'aborted', finished_at: new Date().toISOString() });
+    return landing(row.id);
+  }
+  if (orderOk(abortOrder) && abortSession) {
+    const row = await fetchOrder('buy_order', abortOrder);
+    if (!row || row.session_id !== abortSession) return landing(undefined, 'pedido-no-reconocido');
+    if (['pending', 'creating'].includes(row.status)) await updateOrder(row.id, { status: 'aborted', finished_at: new Date().toISOString() });
+    return landing(row.id);
+  }
+  return landing(undefined, 'sin-token');
+}
+async function status(request: Request): Promise<Response> {
+  const h = cors(request);
+  if (!allowedOrigins.has(request.headers.get('origin') || '')) return json({ ok: false }, 403, h);
+  const id = new URL(request.url).searchParams.get('pedido') || '';
+  if (!uuidOk(id)) return json({ ok: false, error: 'Referencia inválida.' }, 400, h);
+  const row = await fetchOrder('id', id);
+  if (!row) return json({ ok: false, error: 'Pedido no encontrado.' }, 404, h);
+  // No exponer ni correo, teléfono, dirección ni respuesta financiera completa al consultar públicamente.
+  return json({ ok: true, pedido: row.id, orden: row.buy_order, total: row.amount_clp,
+    estado: row.status, productos: row.items.map(item => ({ nombre: item.nombre, cantidad: item.cantidad })) }, 200, h);
+}
+Deno.serve(async (request: Request): Promise<Response> => {
+  if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors(request) });
+  const action = new URL(request.url).searchParams.get('accion');
+  try {
+    if (action === 'iniciar' && request.method === 'POST') return await start(request);
+    if (action === 'retorno' && ['GET', 'POST'].includes(request.method)) return await callback(request);
+    if (action === 'estado' && request.method === 'GET') return await status(request);
+    return json({ ok: false, error: 'Ruta no encontrada.' }, 404, cors(request));
+  } catch (e) {
+    console.error('Error Webpay:', e);
+    if (action === 'retorno') return landing(undefined, 'no-verificado');
+    return json({ ok: false, error: 'No pudimos verificar la operación. Contacta a la tienda antes de reintentar.' }, 500, cors(request));
+  }
 });
