@@ -1,0 +1,27 @@
+/* SOLUCAR MÁS · Interfaz cohesionada · Noviembre 2026 */
+:root { --sm-accent:#cf1836; --sm-radius:12px; }
+html {scroll-behavior:smooth;}
+/* Logo y controles con dimensiones estables entre páginas y temas. */
+.site-header .brand,.auth-header .auth-brand{flex-shrink:0;min-width:0;display:inline-flex;align-items:center;}
+.site-header .brand img.logo-light,.site-header .brand img.logo-dark,
+.auth-header .auth-brand img.logo-light,.auth-header .auth-brand img.logo-dark{width:154px!important;max-width:154px!important;height:78px!important;max-height:78px!important;object-fit:contain!important;object-position:center!important;filter:none!important;}
+.site-header .header-inner,.auth-header .auth-nav{min-height:88px!important;box-sizing:border-box;}
+#themeToggle,#themeSwitch{height:43px!important;width:43px!important;min-width:43px!important;max-width:43px!important;border-radius:11px!important;display:inline-grid!important;place-items:center!important;flex:0 0 43px!important;line-height:1!important;transition:background .2s,color .2s,border-color .2s!important;}
+#themeSwitch span{display:inline-block;width:24px;text-align:center;line-height:1;}
+.auth-header{background:var(--nav,#fff)!important;border-bottom:2px solid #c81736!important;}
+.auth-header .auth-nav{max-width:1190px;margin:0 auto;gap:18px;}
+.auth-header nav{display:flex;align-items:center;gap:8px;}
+.auth-header nav a{white-space:nowrap;}
+/* Reducción de ruido visual, sin modificar formularios ni acciones. */
+.hero-note,.hero-corner{display:none!important;}
+.service-card,.surface-card,.pay-card,.auth-login-card{box-shadow:0 8px 24px rgba(11,25,43,.06)!important;}
+/* Campos y selectores legibles también en modo oscuro. */
+.sm-phone-field{display:flex!important;align-items:stretch;gap:8px;min-width:0;}
+.sm-phone-field select{flex:0 0 128px;width:128px;max-width:42%;background:var(--surface,var(--page,#fff));color:var(--ink,#142335);border:1px solid var(--line,#b6c1d0);padding:0 9px;border-radius:10px;min-height:48px;font:inherit;cursor:pointer;}
+.sm-phone-field input{flex:1 1 0;min-width:0;width:100%;}
+.sm-password-wrap{position:relative;display:block;min-width:0;}
+.sm-password-wrap input{padding-right:98px!important;width:100%;}
+.sm-password-toggle{position:absolute;right:8px;top:50%;transform:translateY(-50%);height:35px;min-width:74px;border:1px solid var(--line,#aeb6c5);border-radius:8px;background:var(--surface2,#edf1f5);color:var(--ink,#142335);font-size:12px;font-weight:800;padding:0 8px;cursor:pointer;z-index:2;}
+.sm-password-toggle:hover,.sm-password-toggle:focus-visible{border-color:var(--sm-accent);outline-offset:2px;}
+.sm-field-hint{display:block;font-size:12px;color:var(--muted,#657286);margin:5px 0 0;}
+@media(max-width:650px){.site-header .brand img.logo-light,.site-header .brand img.logo-dark,.auth-header .auth-brand img.logo-light,.auth-header .auth-brand img.logo-dark{width:124px!important;max-width:124px!important;height:64px!important;max-height:64px!important}.site-header .header-inner,.auth-header .auth-nav{min-height:76px!important}.sm-phone-field select{flex-basis:110px;width:110px;padding:0 5px}#themeToggle,#themeSwitch{width:40px!important;min-width:40px!important;max-width:40px!important;height:40px!important;flex-basis:40px!important}}
