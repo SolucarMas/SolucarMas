@@ -1,0 +1,136 @@
+/* SOLUCAR MÁS — ajuste de legibilidad en modo claro y fotos más amables (05-11-2026).
+   Solo estilos: no altera inicio de sesión, cotizaciones, catálogo ni pagos. */
+
+/* Tema claro: negros/azules nítidos sobre superficies luminosas. */
+html:not([data-theme="dark"]){
+  --page:#eef3f9;
+  --surface:#ffffff;
+  --surface2:#f5f8fc;
+  --ink:#10243b;
+  --muted:#44576d;
+  --line:#d4dfec;
+  --nav:#ffffff;
+}
+html:not([data-theme="dark"]) body,
+html:not([data-theme="dark"]) .section,
+html:not([data-theme="dark"]) .section-soft,
+html:not([data-theme="dark"]) .intro-strip,
+html:not([data-theme="dark"]) .sm-confidence,
+html:not([data-theme="dark"]) .store-info{
+  color:var(--ink);
+}
+/* Evita textos blancos sobre tarjetas, formularios y navegación blancos. */
+html:not([data-theme="dark"]) .site-header .main-nav a:not(.active):not([aria-current="page"]),
+html:not([data-theme="dark"]) .site-header .icon-button,
+html:not([data-theme="dark"]) .intro-item,
+html:not([data-theme="dark"]) .service-card,
+html:not([data-theme="dark"]) .surface-card:not(#cotizar .quote-aside .surface-card),
+html:not([data-theme="dark"]) .sm-shopping-steps article,
+html:not([data-theme="dark"]) .quote-card,
+html:not([data-theme="dark"]) .store-bottom,
+html:not([data-theme="dark"]) .product-content,
+html:not([data-theme="dark"]) .product-card,
+html:not([data-theme="dark"]) .form-grid,
+html:not([data-theme="dark"]) .sm-confidence-grid{
+  color:#10243b!important;
+  -webkit-text-fill-color:#10243b;
+}
+html:not([data-theme="dark"]) .service-card p,
+html:not([data-theme="dark"]) .surface-card:not(#cotizar .quote-aside .surface-card) p,
+html:not([data-theme="dark"]) .sm-confidence-grid span,
+html:not([data-theme="dark"]) .sm-shopping-steps article p,
+html:not([data-theme="dark"]) .intro-item small,
+html:not([data-theme="dark"]) .product-sub,
+html:not([data-theme="dark"]) .section-heading p,
+html:not([data-theme="dark"]) #cotizar .quote-form-v19 .quote-stage-title p{
+  color:#455d74!important;
+  -webkit-text-fill-color:#455d74;
+}
+html:not([data-theme="dark"]) .field label,
+html:not([data-theme="dark"]) .field input,
+html:not([data-theme="dark"]) .field textarea,
+html:not([data-theme="dark"]) .field select,
+html:not([data-theme="dark"]) .searchbox input,
+html:not([data-theme="dark"]) #cotizar #quoteForm .quote-stage h4{
+  color:#10243b!important;
+  -webkit-text-fill-color:#10243b;
+}
+html:not([data-theme="dark"]) .field input::placeholder,
+html:not([data-theme="dark"]) .field textarea::placeholder,
+html:not([data-theme="dark"]) .searchbox input::placeholder{
+  color:#62758a!important;
+  -webkit-text-fill-color:#62758a;
+  opacity:1;
+}
+/* La portada y la banda de tienda siguen siendo oscuras, con letras BLANCAS legibles. */
+.hero{background:#10243b!important;}
+.hero .hero-bg img{object-position:center 45%;}
+.hero::after{
+  background:linear-gradient(90deg,rgba(5,18,35,.96) 0%,rgba(6,22,42,.92) 35%,rgba(6,22,42,.59) 57%,rgba(7,20,36,.08) 100%)!important;
+}
+.hero h1,.hero h1 .text-gradient,
+.hero .hero-corner strong,
+.feature-banner h2,
+#cotizar .quote-aside h2,
+#cotizar .quote-aside h2 .blue-text{
+  color:#ffffff!important;
+  -webkit-text-fill-color:#ffffff!important;
+}
+.hero .hero-intro,.hero .hero-note{color:#e5edf8!important;-webkit-text-fill-color:#e5edf8!important;}
+.hero .hero-corner{color:#e6eff9!important;background:rgba(7,25,44,.77)!important;}
+.hero .hero-buttons .button-outline{color:#ffffff!important;-webkit-text-fill-color:#ffffff!important;background:rgba(10,29,50,.62)!important;border-color:rgba(255,255,255,.55)!important;}
+html:not([data-theme="dark"]) .feature-banner .banner-text{background:#0c2139;color:#ffffff!important;}
+html:not([data-theme="dark"]) .feature-banner .banner-text h2{color:#ffffff!important;-webkit-text-fill-color:#ffffff!important;}
+html:not([data-theme="dark"]) .feature-banner .banner-text p:not(.eyebrow){color:#d5e2f3!important;-webkit-text-fill-color:#d5e2f3;}
+html:not([data-theme="dark"]) .feature-banner .banner-text .eyebrow{color:#99c7ff!important;-webkit-text-fill-color:#99c7ff!important;}
+.feature-banner .banner-photo img{object-position:56% center;}
+/* Caja de información sobre la foto: contraste constante en ambos temas. */
+.photo-frame .photo-label{background:rgba(7,24,42,.85)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;border:1px solid rgba(255,255,255,.16);}
+.photo-frame .photo-label strong{color:#fff!important;-webkit-text-fill-color:#fff!important;}
+/* Cotizador: distingue deliberadamente el panel oscuro del formulario claro. */
+html:not([data-theme="dark"]) #cotizar .quote-aside,
+html:not([data-theme="dark"]) #cotizar .quote-aside .surface-card{
+  color:#f6f9ff!important;
+  -webkit-text-fill-color:#f6f9ff;
+}
+html:not([data-theme="dark"]) #cotizar .quote-aside .lead,
+html:not([data-theme="dark"]) #cotizar .quote-aside .surface-card p{
+  color:#d5e2f3!important;
+  -webkit-text-fill-color:#d5e2f3!important;
+}
+html:not([data-theme="dark"]) #cotizar .quote-aside .surface-card h3{
+  color:#ffffff!important;
+  -webkit-text-fill-color:#ffffff!important;
+}
+html:not([data-theme="dark"]) #cotizar .quote-aside .eyebrow{
+  color:#9ac7ff!important;
+  -webkit-text-fill-color:#9ac7ff!important;
+}
+html:not([data-theme="dark"]) #cotizar #quoteForm .quote-form-heading{
+  background:#f0f5fb!important;
+  border-bottom:1px solid #d4dfec!important;
+  color:#10243b!important;
+}
+html:not([data-theme="dark"]) #cotizar #quoteForm .quote-form-heading h3{
+  color:#10243b!important;-webkit-text-fill-color:#10243b!important;
+}
+html:not([data-theme="dark"]) #cotizar #quoteForm .quote-form-heading p{
+  color:#44576d!important;-webkit-text-fill-color:#44576d!important;
+}
+html:not([data-theme="dark"]) #cotizar #quoteForm .quote-form-label{
+  color:#135cb9!important;-webkit-text-fill-color:#135cb9!important;
+}
+html:not([data-theme="dark"]) #cotizar #quoteForm .quote-form-label::before{background:#135cb9!important;}
+/* Botones activos siguen teniendo texto blanco sobre azul; no los cambia la regla de tarjetas. */
+html:not([data-theme="dark"]) .button-primary,
+html:not([data-theme="dark"]) .add-cart-button,
+html:not([data-theme="dark"]) .button-submit,
+html:not([data-theme="dark"]) .filter-chip[aria-pressed="true"]{
+  color:#fff!important;-webkit-text-fill-color:#fff!important;
+}
+/* Conservar colores actuales del modo nocturno y las interacciones. */
+@media(max-width:780px){
+  .hero::after{background:linear-gradient(90deg,rgba(5,18,35,.92) 0%,rgba(5,18,35,.83) 60%,rgba(5,18,35,.38) 100%)!important;}
+  .hero .hero-bg img{object-position:60% center;}
+  .feature-banner .banner-photo img{object-position:center;}
+}

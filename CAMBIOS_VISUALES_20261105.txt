@@ -1,0 +1,9 @@
+SOLUCAR MÁS — cambios visuales del 05-11-2026
+
+1. Inicio: sustituidas las fotos de vehículos muy dañados por tres imágenes nuevas y ligeras con roces/abolladuras leves: camioneta comercial y dos tomas de camión.
+2. Los archivos fotográficos son locales y están optimizados como WebP; el hero ya no depende de Unsplash ni de una imagen de siniestro como alternativa.
+3. Modo claro: se ha agregado contraste-claro-20261105.css al final de los estilos en páginas clave. Textos oscuros sobre fondos claros y textos blancos reservados a paneles oscuros, portada y botones azules.
+4. Ningún archivo JavaScript, servicio de cotizaciones, Supabase o Webpay fue modificado.
+
+Instalación: subir y descomprimir el contenido de SolucarMas-main en la carpeta pública de tu hosting, reemplazando los archivos correspondientes. Mantener supabase-config.js y cualquier ajuste privado de producción si difiere de tu copia local.
+Si un navegador sigue mostrando estilos antiguos, forzar la recarga (Ctrl+F5).
