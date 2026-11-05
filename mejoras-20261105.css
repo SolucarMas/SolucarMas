@@ -302,3 +302,87 @@ html[data-theme="dark"] body #cotizar #quoteForm .quote-form-heading h3 {
 html[data-theme="dark"] body #cotizar #quoteForm .quote-form-heading p {
   color:#bfcede!important;
 }
+
+
+/* Revisión 05-11-2026 · más protagonismo al bloque “Cotiza tus repuestos en minutos”. */
+#cotizar #quoteForm .quote-form-heading{
+  position:relative;
+  overflow:hidden;
+  padding-top:30px!important;
+}
+#cotizar #quoteForm .quote-form-heading::before{
+  content:"";
+  position:absolute;
+  inset:0 0 auto 0;
+  height:5px;
+  background:linear-gradient(90deg,#1565e8 0%,#5ca2ff 60%,rgba(92,162,255,0) 100%);
+}
+html[data-theme="dark"] #cotizar #quoteForm .quote-form-heading::before{
+  background:linear-gradient(90deg,#c8102e 0%,#ff6479 60%,rgba(255,100,121,0) 100%);
+}
+#cotizar #quoteForm .quote-fast-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  margin:0 0 12px;
+  padding:8px 12px;
+  border-radius:999px;
+  font-size:.76rem;
+  font-weight:900;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  background:rgba(21,101,232,.10);
+  color:#145bb8;
+  border:1px solid rgba(21,101,232,.18);
+  box-shadow:0 10px 25px rgba(21,101,232,.08);
+}
+#cotizar #quoteForm .quote-fast-badge::before{
+  content:"⚡";
+  font-size:.9rem;
+  line-height:1;
+}
+html[data-theme="dark"] #cotizar #quoteForm .quote-fast-badge{
+  background:rgba(200,16,46,.12);
+  color:#ff8695;
+  border-color:rgba(255,120,141,.22);
+  box-shadow:0 10px 24px rgba(200,16,46,.14);
+}
+#cotizar #quoteForm .quote-form-heading h3{
+  font-size:clamp(1.75rem,2vw,2.15rem)!important;
+  line-height:1.04!important;
+  letter-spacing:-.05em!important;
+  margin:0 0 10px!important;
+  max-width:10.5ch;
+}
+#cotizar #quoteForm .quote-form-heading p{
+  font-size:.98rem!important;
+  line-height:1.6!important;
+  max-width:42ch!important;
+}
+#cotizar #quoteForm .quote-form-heading h3::after{
+  content:"";
+  display:block;
+  width:92px;
+  height:4px;
+  margin-top:14px;
+  border-radius:999px;
+  background:linear-gradient(90deg,#1565e8 0%,rgba(21,101,232,.12) 100%);
+}
+html[data-theme="dark"] #cotizar #quoteForm .quote-form-heading h3::after{
+  background:linear-gradient(90deg,#ff5f76 0%,rgba(255,95,118,.12) 100%);
+}
+#cotizar #quoteForm .quote-form-footer .button-primary{
+  min-height:56px!important;
+  font-size:1rem!important;
+  box-shadow:0 16px 34px rgba(21,101,232,.22)!important;
+}
+html[data-theme="dark"] #cotizar #quoteForm .quote-form-footer .button-primary{
+  box-shadow:0 16px 34px rgba(200,16,46,.26)!important;
+}
+#cotizar #quoteForm .quote-form-footer .button-primary:hover{
+  transform:translateY(-2px) scale(1.01);
+}
+@media(max-width:580px){
+  #cotizar #quoteForm .quote-form-heading h3{max-width:none;}
+  #cotizar #quoteForm .quote-fast-badge{margin-bottom:10px;}
+}
