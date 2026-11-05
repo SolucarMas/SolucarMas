@@ -1,43 +1,16 @@
-# SOLUCAR MÁS — Administración desde Mi cuenta
+# SOLUCAR MÁS · Formulario de contacto directo
 
-## Qué cambia
+## Resultado
+El formulario «Envíanos una consulta» de la portada envía mensajes automáticamente a **contacto@solucarmas.cl** mediante **Supabase Edge Function + Resend**. Ya no abre la app de correo del visitante. El correo remitente lleva el mensaje; `reply_to` se ajusta al email que dejó el visitante. El resultado solo marca «enviado» si Resend acepta la solicitud.
 
-En `cuenta.html`, solo una sesión cuyo correo confirmado sea `contacto@solucarmas.cl` **y** cuyo ID esté autorizado en `public.store_admins` verá **Administración** en el menú lateral. Al entrar, encontrará el botón **Abrir panel de productos** que dirige a `administracion.html`. Los clientes restantes conservarán su vista normal.
+## Orden de instalación
 
-## Publicar (GitHub, rama main)
+1. **Supabase → SQL Editor → New query**: pega y ejecuta `supabase/migrations/contacto_limites.sql`. Crea una tabla restringida para frenar envíos excesivos y una función SQL accesible solo por la clave de servicio.
+2. **Supabase → Edge Functions → Deploy a new function → Via Editor**: usa el nombre exacto **`contacto`** y pega `supabase/functions/contacto/index.ts`; publica la función.
+3. En **Edge Functions → contacto → Settings**, configura **Verify JWT with legacy secret = OFF**. La función permite solo POST desde `https://solucarmas.cl` y `https://www.solucarmas.cl`, valida los campos y limita solicitudes. Una comprobación de `Origin` ayuda con navegadores, pero no garantiza detener a todos los bots: vigila el consumo de Resend y añade CAPTCHA/Turnstile si recibes spam.
+4. En **Edge Functions → Secrets** verifica que exista `RESEND_API_KEY` (de tu integración de cotizaciones). Confirma también que `QUOTE_FROM_EMAIL` sea un remitente válido autorizado en Resend. Si prefieres un remitente distinto, agrega `CONTACT_FROM_EMAIL` con un correo de dominio verificado. El destinatario ya está fijado como `contacto@solucarmas.cl`; no pongas llaves privadas en HTML o JavaScript del navegador.
+5. **GitHub → repositorio de SOLUCAR MÁS**: haz copia de seguridad y sube **solo** `index.html` y `contacto-directo.js` a la raíz; confirma con **Commit changes**. No subas la carpeta `supabase` al sitio público.
+6. Abre `https://solucarmas.cl/#contacto` y actualiza con Ctrl+F5. Completa una consulta de prueba y pulsa **Enviar consulta**. Comprueba que el mensaje llegue a la bandeja de entrada (y revisa Spam). Si falla, mira **Edge Functions → contacto → Logs**.
 
-1. Haz una copia de seguridad de `cuenta.html`.
-2. Sube el archivo **`cuenta-admin.js`** a la raíz del repositorio (junto a `cuenta.js`).
-3. Abre `cuenta.html` en GitHub, pulsa el lápiz (Edit) y, inmediatamente **antes de `</body>`**, agrega esta línea:
-
-   ```html
-   <script defer src="cuenta-admin.js?v=1"></script>
-   ```
-
-4. Haz clic en **Commit changes**.
-5. Confirma que `supabase-config.js`, `administracion.html` y `administracion.js` sigan en la raíz.
-6. Ingresa con `contacto@solucarmas.cl` a `https://solucarmas.cl/cuenta.html`, recarga con Ctrl+F5 y busca la opción **Administración**.
-7. Abre el panel y confirma que puedas ver el catálogo; haz pruebas de edición solo en un entorno donde tengas autorizada la modificación de los productos.
-
-## Si no aparece Administración
-
-En Supabase → SQL Editor (tras confirmar la cuenta en Authentication → Users), ejecuta:
-
-```sql
-insert into public.store_admins (user_id)
-select id from auth.users
-where lower(email) = 'contacto@solucarmas.cl'
-  and email_confirmed_at is not null
-on conflict (user_id) do nothing;
-
-select u.email, a.granted_at
-from public.store_admins a
-join auth.users u on u.id = a.user_id
-where lower(u.email) = 'contacto@solucarmas.cl';
-```
-
-Si `is_store_admin` no existe, ejecuta primero la migración de catálogo administrativo proporcionada previamente. Nunca añadas `service_role` ni secretos de Transbank a los archivos públicos.
-
-## Seguridad
-
-El correo sirve únicamente para determinar qué opción mostrar. La función RPC `is_store_admin()` y las políticas RLS de Supabase son las que conceden acceso real. Si el usuario no inicia sesión o falla la consulta, la opción no aparece. La página `administracion.html` debe mantener su propio control de autorización.
+## Nota
+No se alteran la función `enviar-cotizacion`, el carrito, Webpay o la administración. Los mensajes no se guardan en una base de datos: se transmiten al correo de destino por Resend. El control de frecuencia solo guarda identificadores irreversibles temporalmente. Si no tienes dominio de envío verificado en Resend, debes configurarlo antes de que el envío funcione.
