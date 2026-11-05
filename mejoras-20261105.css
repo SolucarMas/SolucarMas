@@ -240,3 +240,26 @@ html[data-theme="dark"] #cotizar .quote-form-v19 .quote-stage-index{
   #cotizar .quote-form-v19 .quote-form-footer{padding:20px!important;}
   #cotizar .quote-form-v19 .quote-stage-index{width:36px;height:36px;flex-basis:36px;}
 }
+
+
+/* AJUSTE FINAL DE TITULARES: mantener cada frase en un solo color.
+   Los acentos se conservan en botones, indicadores y enlaces, no en palabras sueltas. */
+h1 .text-gradient,
+h2 .text-gradient,
+h3 .text-gradient,
+h1 .blue-text,
+h2 .blue-text,
+h3 .blue-text {
+  color:inherit!important;
+  background:none!important;
+  background-image:none!important;
+  -webkit-background-clip:initial!important;
+  background-clip:initial!important;
+  -webkit-text-fill-color:currentColor!important;
+}
+/* Cotizaciones: todo el título "¿Qué necesita tu vehículo?" en blanco uniforme. */
+#cotizar .quote-aside h2,
+#cotizar .quote-aside h2 .blue-text {
+  color:#ffffff!important;
+  -webkit-text-fill-color:#ffffff!important;
+}
