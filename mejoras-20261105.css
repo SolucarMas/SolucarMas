@@ -263,3 +263,42 @@ h3 .blue-text {
   color:#ffffff!important;
   -webkit-text-fill-color:#ffffff!important;
 }
+
+/* Corrección de contraste de la cabecera de cotización en modo claro.
+   Las reglas anteriores dejaban texto blanco (del diseño oscuro)
+   sobre el fondo claro del formulario. No modifica el comportamiento del formulario. */
+html:not([data-theme="dark"]) body #cotizar #quoteForm .quote-form-heading {
+  background:#f5f8fc!important;
+  color:#10243b!important;
+  border-bottom:1px solid #d9e3ef!important;
+}
+html:not([data-theme="dark"]) body #cotizar #quoteForm .quote-form-heading h3 {
+  color:#10243b!important;
+  -webkit-text-fill-color:#10243b!important;
+}
+html:not([data-theme="dark"]) body #cotizar #quoteForm .quote-form-heading p {
+  color:#425a72!important;
+  -webkit-text-fill-color:#425a72!important;
+}
+html:not([data-theme="dark"]) body #cotizar #quoteForm .quote-form-label {
+  color:#145bb8!important;
+  -webkit-text-fill-color:#145bb8!important;
+}
+html:not([data-theme="dark"]) body #cotizar #quoteForm .quote-form-label::before {
+  background:#145bb8!important;
+}
+html:not([data-theme="dark"]) body #cotizar #quoteForm .quote-form-heading::after {
+  display:none!important;
+}
+/* En oscuro, fondo y tipografía mantienen un contraste alto. */
+html[data-theme="dark"] body #cotizar #quoteForm .quote-form-heading {
+  background:#111e2d!important;
+  color:#f7fbff!important;
+}
+html[data-theme="dark"] body #cotizar #quoteForm .quote-form-heading h3 {
+  color:#f7fbff!important;
+  -webkit-text-fill-color:#f7fbff!important;
+}
+html[data-theme="dark"] body #cotizar #quoteForm .quote-form-heading p {
+  color:#bfcede!important;
+}
