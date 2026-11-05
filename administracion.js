@@ -11,6 +11,56 @@
   let products=[],editing=null,originalImage=null;
   const publicPhoto=path=>path ? conf.url.replace(/\/$/,'')+'/storage/v1/object/public/store-products/'+path.split('/').map(encodeURIComponent).join('/') : '';
   const money=n=>new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(n);
+  // El campo de precio es texto para mostrar separadores de miles, pero se guarda un entero.
+  const formatPrice=value=>{
+    const digits=String(value??'').replace(/\D/g,'').replace(/^0+(?=\d)/,'');
+    return digits.replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+  };
+  const parsePrice=value=>{
+    const digits=String(value??'').replace(/\D/g,'');
+    return digits ? Number(digits) : NaN;
+  };
+  function keepPriceFormatted(){
+    const input=$('#productPrice');
+    const current=input.value;
+    const beforeCursor=current.slice(0,input.selectionStart??current.length).replace(/\D/g,'').length;
+    const formatted=formatPrice(current);
+    if(current===formatted)return;
+    input.value=formatted;
+    if(document.activeElement===input){
+      let index=0,seen=0;
+      while(index<formatted.length&&seen<beforeCursor){
+        if(/\d/.test(formatted[index]))seen++;
+        index++;
+      }
+      input.setSelectionRange(index,index);
+    }
+  }
+  // Permite categorías habituales, categorías ya existentes y una nueva opción personalizada.
+  function refreshCategoryOptions(){
+    const group=$('#existingCategoriesGroup');
+    const select=$('#productCategory');
+    const selected=select.value;
+    group.replaceChildren();
+    const known=new Set(Array.from(select.options).filter(opt=>opt.parentElement!==group).map(opt=>opt.value));
+    const extras=[...new Set(products.map(p=>p.category?.trim()).filter(Boolean))]
+      .filter(category=>!known.has(category))
+      .sort((a,b)=>a.localeCompare(b,'es-CL'));
+    for(const category of extras){
+      const opt=document.createElement('option');opt.value=category;opt.textContent=category;group.append(opt);
+    }
+    group.disabled=extras.length===0;
+    if(Array.from(select.options).some(opt=>opt.value===selected))select.value=selected;
+  }
+  function syncCustomCategory(){
+    const custom=$('#productCategory').value==='__new__';
+    $('#customCategoryRow').classList.toggle('hidden',!custom);
+    $('#productCategoryCustom').required=custom;
+    if(!custom)$('#productCategoryCustom').value='';
+  }
+  function selectedCategory(){
+    return ($('#productCategory').value==='__new__' ? $('#productCategoryCustom').value : $('#productCategory').value).trim();
+  }
   const cleanId=name=>name.toLocaleLowerCase('es-CL').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,36);
   const imageTypes=new Set(['image/jpeg','image/png','image/webp']);
   async function checkAccess(){
@@ -26,7 +76,7 @@
     status('#listStatus','Cargando catálogo…');
     const {data,error}=await db.from('store_products').select('id,name,category,details,price_clp,image_path,active,sort_order').order('sort_order',{ascending:true}).order('name',{ascending:true});
     if(error){status('#listStatus','No se pudo cargar el catálogo: '+error.message,true);return}
-    products=data||[];draw();status('#listStatus','');
+    products=data||[];refreshCategoryOptions();draw();status('#listStatus','');
   }
   function draw(){
     const root=$('#productList');root.replaceChildren();
@@ -92,7 +142,15 @@
     editing=product?.id||null;originalImage=product?.image_path||null;
     $('#editorTitle').textContent=product?'Editar producto':'Nuevo producto';
     $('#productId').value=product?.id||'';$('#productName').value=product?.name||'';
-    $('#productCategory').value=product?.category||'Accesorios';$('#productPrice').value=product?.price_clp??'';
+    const category=product?.category||'';
+    const select=$('#productCategory');
+    if(category&&!Array.from(select.options).some(opt=>opt.value===category)){
+      const option=document.createElement('option');option.value=category;option.textContent=category;
+      $('#existingCategoriesGroup').append(option);$('#existingCategoriesGroup').disabled=false;
+    }
+    select.value=category;
+    $('#productCategoryCustom').value='';syncCustomCategory();
+    $('#productPrice').value=product?.price_clp==null ? '' : formatPrice(product.price_clp);
     $('#productDetails').value=product?.details||'';$('#productSort').value=product?.sort_order??(products.length+1)*10;
     $('#productActive').checked=product?.active??true;$('#productPhoto').value='';
     const photo=$('#productPreview');photo.src=publicPhoto(originalImage)||'';photo.classList.toggle('hidden',!originalImage);
@@ -100,9 +158,9 @@
   }
   async function save(event){
     event.preventDefault();
-    const name=$('#productName').value.trim(), category=$('#productCategory').value.trim();
-    const price=Number($('#productPrice').value), sort=Number($('#productSort').value);
-    if(name.length<3||category.length<2||!Number.isInteger(price)||price<1||price>5000000||!Number.isInteger(sort)){
+    const name=$('#productName').value.trim(), category=selectedCategory();
+    const price=parsePrice($('#productPrice').value), sort=Number($('#productSort').value);
+    if(name.length<3||category.length<2||category.length>60||!Number.isInteger(price)||price<1||price>5000000||!Number.isInteger(sort)){
       status('#editStatus','Revisa nombre, categoría, precio y orden.',true);return}
     const id=editing||(`${cleanId(name)||'producto'}-${crypto.randomUUID().slice(0,6)}`);
     if(id.length>50||!/^[a-z0-9-]{3,50}$/.test(id))return status('#editStatus','El identificador generado no es válido.',true);
@@ -137,6 +195,8 @@
     $('#adminPassword').value='';await checkAccess();
   });
   $('#logoutBtn').addEventListener('click',async()=>{await db.auth.signOut();dashboard.classList.add('hidden');login.classList.remove('hidden');status('#loginStatus','Sesión cerrada.');});
+  $('#productCategory').addEventListener('change',syncCustomCategory);
+  $('#productPrice').addEventListener('input',keepPriceFormatted);
   $('#adminSearch')?.addEventListener('input',draw);
   $('#adminActiveOnly')?.addEventListener('change',draw);
   $('#newBtn').addEventListener('click',()=>openEditor());
