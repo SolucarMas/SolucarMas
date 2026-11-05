@@ -1,16 +1,20 @@
-# SOLUCAR MÁS — portada simplificada y Mi cuenta uniforme
+# SOLUCAR MÁS — Eliminar productos y patente sin recuadro
 
-Esta actualización retira el bloque «Nuestros servicios» de tres tarjetas y el bloque «Tú nos cuentas. Nosotros buscamos» (si estuviera presente). Conserva la sección de soluciones, la tienda, el formulario de cotizaciones, la información legal, las cuentas y Webpay. También retira la tira introductoria repetitiva para acortar la portada.
+## Qué cambia
+- `administracion.html` + `administracion.js`: botón «Eliminar» junto a «Editar» en cada producto, con confirmación antes del borrado definitivo. Solo funciona si la sesión está autorizada en `store_admins` y la política RLS permite DELETE.
+- `index.html`: elimina el recuadro y fondo coloreado alrededor de «Patente del vehículo» en claro y oscuro, manteniendo el campo obligatorio y el texto de ayuda.
+- `habilitar_eliminar_productos.sql`: concede DELETE únicamente a usuarios autenticados con `is_store_admin()`; no elimina productos por sí mismo.
 
-En Mi cuenta se conservan los formularios y el acceso de administrador, pero se unifican tamaño de logo, encabezado, navegación y botón claro/oscuro con el inicio. El botón conserva su id `themeSwitch` y sus controladores de tema existentes.
+## Instalar en este orden
+1. En Supabase > SQL Editor > New query, ejecuta el contenido de `habilitar_eliminar_productos.sql` y verifica que aparezca Success.
+2. En GitHub > SolucarMas/SolucarMas, guarda una copia de seguridad y reemplaza en la raíz `administracion.html`, `administracion.js` e `index.html` por estos archivos.
+3. Espera a que termine la publicación en GitHub Pages y recarga usando Ctrl+F5.
+4. Entra a `https://solucarmas.cl/administracion.html` con la cuenta autorizada. Haz una prueba con un producto creado expresamente para probar y confirma que desaparece de la tienda.
+5. Abre la cotización en ambos modos para comprobar el nuevo diseño del campo patente.
 
-## Instalación en GitHub Pages
-
-1. Haz copia de seguridad de tus archivos vigentes.
-2. Sube a la raíz del repositorio estos **cinco archivos**: `index.html`, `cuenta.html`, `solucar-consistente.css`, `solucar-ui.css` y `solucar-ui.js`. Reemplaza los dos HTML y conserva el resto de archivos actuales.
-3. Confirma los cambios en `main` y comprueba la publicación de GitHub Pages.
-4. Verifica tanto modo claro como oscuro en inicio y Mi cuenta, así como acceso del administrador, cotizaciones, carrito y Webpay en modo de pruebas.
-
-**No** subas secretos ni modifiques las funciones de Supabase. **No** sustituyas `pago.html`, `pago.js`, `app.js` ni `cuenta.js` para aplicar este cambio.
-
-Nota: no dispongo de `tienda.html` actual para garantizar uniformidad total de esa página. La modificación es visual/estructural y no ha sido probada con una compra real.
+## Notas
+- La eliminación borra la fila del catálogo y no se puede deshacer desde el panel. Para solo retirar temporalmente un producto, usa «Editar» y desactiva «Visible».
+- Se conservan los datos históricos de pedidos en `webpay_orders`, puesto que Webpay guarda detalles del producto en cada orden. La fotografía subida a Storage no se elimina automáticamente; así se evita borrar archivos que podrían seguir utilizándose.
+- Si un cliente mantiene un producto eliminado en su carrito, deberá actualizar su carrito: el servidor no aceptará cobrar artículos que ya no existan.
+- No vuelvas a ejecutar el SQL de creación inicial del catálogo indiscriminadamente: ese script contiene productos de muestra con ON CONFLICT DO NOTHING y podría recrear alguno que hayas borrado.
+- No se modifican las funciones Webpay, las claves ni el sistema de autenticación.

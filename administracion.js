@@ -40,8 +40,31 @@
       const meta=document.createElement('p');meta.className='item-meta';meta.textContent=`${p.category} · ${money(p.price_clp)} · ${p.active?'Visible':'Oculto'}`;
       details.append(title,meta);
       const edit=document.createElement('button');edit.type='button';edit.textContent='Editar';edit.className='secondary';edit.addEventListener('click',()=>openEditor(p));
-      item.append(image,details,edit);root.append(item);
+      const actions=document.createElement('div');actions.className='item-actions';
+      actions.append(edit);
+      const remove=document.createElement('button');remove.type='button';remove.className='danger';remove.textContent='Eliminar';
+      remove.setAttribute('aria-label','Eliminar producto '+p.name);
+      remove.addEventListener('click',()=>deleteProduct(p,remove));
+      actions.append(remove);
+      item.append(image,details,actions);root.append(item);
     }
+  }
+  // Borrado real del catálogo, con autorización RLS. Los pedidos anteriores
+  // conservan una instantánea de los productos comprados (webpay_orders.items).
+  async function deleteProduct(product,button){
+    const name=product.name;
+    if(!confirm(`¿Eliminar definitivamente «${name}» de la tienda?\n\nDejará de aparecer en el catálogo y no podrá comprarse. Esta acción no se puede deshacer.`))return;
+    button.disabled=true;
+    status('#listStatus','Eliminando «'+name+'»…');
+    try{
+      const {data,error}=await db.from('store_products').delete().eq('id',product.id).select('id');
+      if(error)throw error;
+      if(!data?.length)throw Error('No se pudo eliminar. Verifica que la cuenta tenga permiso de eliminación en Supabase.');
+      if(editing===product.id){editing=null;originalImage=null;$('#productEditor').classList.add('hidden');}
+      await loadProducts();
+      status('#listStatus','«'+name+'» fue eliminado del catálogo. Las compras anteriores permanecen registradas.');
+    }catch(err){status('#listStatus','No se pudo eliminar: '+(err.message||'Error desconocido'),true);}
+    finally{button.disabled=false;}
   }
   function openEditor(product=null){
     editing=product?.id||null;originalImage=product?.image_path||null;
