@@ -1,0 +1,8 @@
+SOLUCAR MÁS — Formulario de cotización destacado
+
+1. Guarda una copia del index.html que está actualmente en GitHub.
+2. Reemplaza únicamente index.html por el del paquete, en la raíz del repositorio.
+3. Haz Commit changes y actualiza https://solucarmas.cl con Ctrl+F5.
+4. Revisa el formulario en ambos temas y prueba el envío con información de prueba.
+
+La actualización cambia solamente el diseño de quoteForm. Conserva los IDs, la funcionalidad de envío, las listas de comuna y prefijos, el resto del sitio y los enlaces a Webpay.
