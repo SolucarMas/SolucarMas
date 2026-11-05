@@ -1,0 +1,9 @@
+SOLUCAR MÁS: favicon para resultados de Google
+
+1. En GitHub, repositorio SolucarMas, sube index.html, favicon.png, favicon.ico y apple-touch-icon.png a la RAÍZ del repositorio (junto a index.html). Conserva los demás archivos.
+2. Commit changes y espera despliegue de GitHub Pages.
+3. Comprueba https://solucarmas.cl/favicon.png en navegador: debe verse el logo.
+4. En Google Search Console, inspecciona https://solucarmas.cl/ y usa Solicitar indexación.
+5. Google puede tardar días o semanas en mostrar el favicon; no está garantizado.
+
+No se modificaron los componentes de Webpay, cotizaciones ni administración.
