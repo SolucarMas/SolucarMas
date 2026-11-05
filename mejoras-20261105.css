@@ -304,85 +304,269 @@ html[data-theme="dark"] body #cotizar #quoteForm .quote-form-heading p {
 }
 
 
-/* Revisión 05-11-2026 · más protagonismo al bloque “Cotiza tus repuestos en minutos”. */
-#cotizar #quoteForm .quote-form-heading{
-  position:relative;
-  overflow:hidden;
-  padding-top:30px!important;
+/* ============================================================
+   SOLUCAR MÁS — Formulario de cotización · diseño con presencia
+   SOLO presentación: no cambia validaciones, scripts ni envíos.
+   ============================================================ */
+
+/* En el modo claro, el formulario funciona como una ficha principal
+   con cabecera oscura y etapas blancas diferenciadas. */
+html:not([data-theme="dark"]) body #cotizar .quote-card {
+  background:#f5f8fc!important;
+  border:1px solid #d5e0ed!important;
+  box-shadow:0 22px 55px rgba(20,48,84,.13)!important;
 }
-#cotizar #quoteForm .quote-form-heading::before{
-  content:"";
-  position:absolute;
-  inset:0 0 auto 0;
-  height:5px;
-  background:linear-gradient(90deg,#1565e8 0%,#5ca2ff 60%,rgba(92,162,255,0) 100%);
+html:not([data-theme="dark"]) body #cotizar #quoteForm .quote-form-heading {
+  background:#122740!important;
+  color:#fff!important;
+  border-bottom:0!important;
+  padding:34px 34px 32px!important;
 }
-html[data-theme="dark"] #cotizar #quoteForm .quote-form-heading::before{
-  background:linear-gradient(90deg,#c8102e 0%,#ff6479 60%,rgba(255,100,121,0) 100%);
+html:not([data-theme="dark"]) body #cotizar #quoteForm .quote-form-heading h3 {
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+  font-size:clamp(1.85rem,2.65vw,2.55rem)!important;
+  line-height:1.14!important;
+  letter-spacing:-.045em;
+  max-width:18ch;
+  margin:13px 0!important;
 }
-#cotizar #quoteForm .quote-fast-badge{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  margin:0 0 12px;
-  padding:8px 12px;
-  border-radius:999px;
-  font-size:.76rem;
-  font-weight:900;
-  letter-spacing:.08em;
-  text-transform:uppercase;
-  background:rgba(21,101,232,.10);
-  color:#145bb8;
-  border:1px solid rgba(21,101,232,.18);
-  box-shadow:0 10px 25px rgba(21,101,232,.08);
-}
-#cotizar #quoteForm .quote-fast-badge::before{
-  content:"⚡";
-  font-size:.9rem;
-  line-height:1;
-}
-html[data-theme="dark"] #cotizar #quoteForm .quote-fast-badge{
-  background:rgba(200,16,46,.12);
-  color:#ff8695;
-  border-color:rgba(255,120,141,.22);
-  box-shadow:0 10px 24px rgba(200,16,46,.14);
-}
-#cotizar #quoteForm .quote-form-heading h3{
-  font-size:clamp(1.75rem,2vw,2.15rem)!important;
-  line-height:1.04!important;
-  letter-spacing:-.05em!important;
-  margin:0 0 10px!important;
-  max-width:10.5ch;
-}
-#cotizar #quoteForm .quote-form-heading p{
-  font-size:.98rem!important;
-  line-height:1.6!important;
-  max-width:42ch!important;
-}
-#cotizar #quoteForm .quote-form-heading h3::after{
-  content:"";
-  display:block;
-  width:92px;
-  height:4px;
-  margin-top:14px;
-  border-radius:999px;
-  background:linear-gradient(90deg,#1565e8 0%,rgba(21,101,232,.12) 100%);
-}
-html[data-theme="dark"] #cotizar #quoteForm .quote-form-heading h3::after{
-  background:linear-gradient(90deg,#ff5f76 0%,rgba(255,95,118,.12) 100%);
-}
-#cotizar #quoteForm .quote-form-footer .button-primary{
-  min-height:56px!important;
+html:not([data-theme="dark"]) body #cotizar #quoteForm .quote-form-heading p {
+  color:#d5e2f1!important;
+  -webkit-text-fill-color:#d5e2f1!important;
   font-size:1rem!important;
-  box-shadow:0 16px 34px rgba(21,101,232,.22)!important;
+  line-height:1.6!important;
+  max-width:46ch;
 }
-html[data-theme="dark"] #cotizar #quoteForm .quote-form-footer .button-primary{
-  box-shadow:0 16px 34px rgba(200,16,46,.26)!important;
+html:not([data-theme="dark"]) body #cotizar #quoteForm .quote-form-label {
+  color:#9bc6ff!important;
+  -webkit-text-fill-color:#9bc6ff!important;
+  font-size:.76rem!important;
+  letter-spacing:.14em;
 }
-#cotizar #quoteForm .quote-form-footer .button-primary:hover{
-  transform:translateY(-2px) scale(1.01);
+html:not([data-theme="dark"]) body #cotizar #quoteForm .quote-form-label::before {
+  background:#72b0ff!important;
 }
-@media(max-width:580px){
-  #cotizar #quoteForm .quote-form-heading h3{max-width:none;}
-  #cotizar #quoteForm .quote-fast-badge{margin-bottom:10px;}
+html:not([data-theme="dark"]) body #cotizar #quoteForm .quote-stage {
+  background:#fff!important;
+  border:1px solid #dbe5f0!important;
+  box-shadow:0 7px 22px rgba(22,56,97,.06)!important;
+}
+html:not([data-theme="dark"]) body #cotizar #quoteForm .quote-stage--vehicle,
+html:not([data-theme="dark"]) body #cotizar #quoteForm .quote-stage--last {
+  background:#fff!important;
+}
+/* Etapas convertidas en tarjetas espaciadas, en lugar de
+   tres franjas continuas de color gris. */
+body #cotizar #quoteForm {
+  display:flow-root;
+}
+body #cotizar #quoteForm .quote-stage {
+  margin:20px 24px 0!important;
+  padding:26px 27px 29px!important;
+  border-radius:17px!important;
+  border:1px solid var(--line)!important;
+}
+body #cotizar #quoteForm .quote-stage + .quote-stage {
+  border-top:1px solid var(--line)!important;
+}
+body #cotizar #quoteForm .quote-stage-title {
+  align-items:center!important;
+  gap:16px!important;
+  margin-bottom:24px!important;
+}
+body #cotizar #quoteForm .quote-stage-title h4 {
+  font-size:1.12rem!important;
+  line-height:1.32!important;
+  font-weight:850!important;
+  letter-spacing:-.025em;
+}
+body #cotizar #quoteForm .quote-stage-title p {
+  font-size:.87rem!important;
+  line-height:1.55!important;
+  margin-top:5px!important;
+}
+html:not([data-theme="dark"]) body #cotizar #quoteForm .quote-stage-index {
+  background:#eaf2ff!important;
+  border:1px solid #bcd5fc!important;
+  color:#155dc2!important;
+  width:43px!important;
+  height:43px!important;
+  flex-basis:43px!important;
+  border-radius:12px!important;
+  font-size:.88rem!important;
+}
+body #cotizar #quoteForm .quote-stage-fields {
+  gap:20px 18px!important;
+}
+body #cotizar #quoteForm .field {
+  gap:9px!important;
+  min-width:0;
+}
+body #cotizar #quoteForm .field label {
+  font-size:.89rem!important;
+  line-height:1.45!important;
+  font-weight:800!important;
+  letter-spacing:0!important;
+}
+body #cotizar #quoteForm .field input,
+body #cotizar #quoteForm .field textarea,
+body #cotizar #quoteForm .field select {
+  font-size:.96rem!important;
+  line-height:1.5!important;
+  padding:14px 16px!important;
+  border-radius:12px!important;
+  min-height:54px!important;
+  transition:border-color .18s ease,background .18s ease,box-shadow .18s ease!important;
+}
+html:not([data-theme="dark"]) body #cotizar #quoteForm .field input,
+html:not([data-theme="dark"]) body #cotizar #quoteForm .field select,
+html:not([data-theme="dark"]) body #cotizar #quoteForm .field textarea {
+  background:#f9fbfe!important;
+  color:#132842!important;
+  border:1.5px solid #cbd9e9!important;
+}
+html:not([data-theme="dark"]) body #cotizar #quoteForm .field input:focus,
+html:not([data-theme="dark"]) body #cotizar #quoteForm .field select:focus,
+html:not([data-theme="dark"]) body #cotizar #quoteForm .field textarea:focus {
+  border-color:#286fe0!important;
+  background:#fff!important;
+  box-shadow:0 0 0 4px rgba(30,101,218,.13)!important;
+  outline:none!important;
+}
+body #cotizar #quoteForm .field textarea {
+  min-height:155px!important;
+  resize:vertical!important;
+}
+body #cotizar #quoteForm .phone-combo {
+  grid-template-columns:minmax(96px,.85fr) minmax(0,1.15fr)!important;
+  gap:10px!important;
+  min-width:0;
+}
+body #cotizar #quoteForm .phone-combo select,
+body #cotizar #quoteForm .phone-combo input {
+  min-width:0!important;
+  width:100%!important;
+}
+body #cotizar #quoteForm .field .field-note,
+body #cotizar #quoteForm .plate-clean small {
+  font-size:.77rem!important;
+  line-height:1.6!important;
+}
+html:not([data-theme="dark"]) body #cotizar #quoteForm .field .field-note,
+html:not([data-theme="dark"]) body #cotizar #quoteForm .plate-clean small {
+  color:#53657a!important;
+}
+html:not([data-theme="dark"]) body #cotizar #quoteForm .quote-form-footer {
+  margin-top:20px!important;
+  padding:26px 28px 30px!important;
+  background:#f5f8fc!important;
+  border-top:1px solid #dbe5f0;
+}
+body #cotizar #quoteForm .quote-form-footer .quote-submit {
+  width:100%!important;
+  min-height:56px!important;
+  border-radius:12px!important;
+  font-size:.98rem!important;
+  letter-spacing:.01em;
+}
+html:not([data-theme="dark"]) body #cotizar #quoteForm .quote-form-footer .quote-submit {
+  background:#155bbd!important;
+  border-color:#155bbd!important;
+  box-shadow:0 12px 22px rgba(21,91,189,.18)!important;
+}
+html:not([data-theme="dark"]) body #cotizar #quoteForm .quote-form-footer .quote-submit:hover {
+  background:#0f499b!important;
+}
+body #cotizar #quoteForm .quote-form-footer .sm-form-privacy {
+  margin:0 0 17px!important;
+  font-size:.81rem!important;
+  line-height:1.6!important;
+}
+body #cotizar #quoteForm .quote-form-footer .form-help {
+  text-align:center;
+  line-height:1.55!important;
+  font-size:.78rem!important;
+  margin-top:15px!important;
+}
+
+/* Modo oscuro: misma separación de tarjetas, sin cambiar el
+   carácter cromático rojo/marino que ya tiene la marca. */
+html[data-theme="dark"] body #cotizar .quote-card {
+  background:#101d2b!important;
+  border-color:#34465a!important;
+  box-shadow:0 24px 55px rgba(0,0,0,.30)!important;
+}
+html[data-theme="dark"] body #cotizar #quoteForm .quote-form-heading {
+  background:#101c2b!important;
+  padding:34px 34px 32px!important;
+  border-bottom:1px solid #34465a!important;
+}
+html[data-theme="dark"] body #cotizar #quoteForm .quote-form-heading h3 {
+  font-size:clamp(1.85rem,2.65vw,2.55rem)!important;
+  line-height:1.14!important;
+  letter-spacing:-.045em;
+  margin:13px 0!important;
+}
+html[data-theme="dark"] body #cotizar #quoteForm .quote-stage {
+  background:#1a2939!important;
+  border-color:#3a4c60!important;
+  box-shadow:0 6px 18px rgba(0,0,0,.13)!important;
+}
+html[data-theme="dark"] body #cotizar #quoteForm .quote-stage-index {
+  background:#322938!important;
+  border-color:#654352!important;
+  color:#ff9aab!important;
+  width:43px!important;
+  height:43px!important;
+  flex-basis:43px!important;
+}
+html[data-theme="dark"] body #cotizar #quoteForm .field input,
+html[data-theme="dark"] body #cotizar #quoteForm .field select,
+html[data-theme="dark"] body #cotizar #quoteForm .field textarea {
+  background:#142334!important;
+  color:#f5f8fc!important;
+  border:1.5px solid #42566d!important;
+}
+html[data-theme="dark"] body #cotizar #quoteForm .field input:focus,
+html[data-theme="dark"] body #cotizar #quoteForm .field select:focus,
+html[data-theme="dark"] body #cotizar #quoteForm .field textarea:focus {
+  border-color:#ff7285!important;
+  box-shadow:0 0 0 4px rgba(241,71,91,.14)!important;
+}
+html[data-theme="dark"] body #cotizar #quoteForm .quote-form-footer {
+  background:#111f2e!important;
+  margin-top:20px!important;
+  border-top:1px solid #34465a;
+  padding:26px 28px 30px!important;
+}
+@media(max-width:640px) {
+  body #cotizar #quoteForm .quote-stage {
+    margin:13px 12px 0!important;
+    padding:22px 18px 24px!important;
+    border-radius:14px!important;
+  }
+  body #cotizar #quoteForm .quote-stage-fields {
+    grid-template-columns:1fr!important;
+    gap:16px!important;
+  }
+  body #cotizar #quoteForm .phone-combo {
+    grid-template-columns:minmax(90px,.7fr) minmax(0,1.3fr)!important;
+    gap:8px!important;
+  }
+  body #cotizar #quoteForm .quote-form-heading {
+    padding:27px 22px 25px!important;
+  }
+  body #cotizar #quoteForm .quote-form-footer {
+    padding:22px 18px 26px!important;
+  }
+  html:not([data-theme="dark"]) body #cotizar #quoteForm .quote-form-heading,
+  html[data-theme="dark"] body #cotizar #quoteForm .quote-form-heading {
+    padding:27px 22px 25px!important;
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  body #cotizar #quoteForm .field input,
+  body #cotizar #quoteForm .field select,
+  body #cotizar #quoteForm .field textarea { transition:none!important; }
 }
