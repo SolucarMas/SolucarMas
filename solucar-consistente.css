@@ -1,0 +1,31 @@
+/* SOLUCAR MÁS — identidad coherente para inicio y Mi Cuenta */
+:root{--solucar-header-height:92px}
+.site-header,.auth-header{background:var(--nav,#101b29)!important;border-bottom:2px solid #e3334e!important;box-shadow:0 5px 18px rgba(1,8,16,.12)!important;position:sticky!important;top:0!important;z-index:40!important}
+.auth-header{background:#ffffff!important;color:#182638!important}
+html[data-theme=dark] .auth-header{background:#101b29!important;color:#f6f8fc!important}
+.auth-header .auth-nav,.site-header .header-inner{min-height:var(--solucar-header-height)!important;max-width:1190px;margin-inline:auto}
+.auth-header .auth-nav{justify-content:space-between!important;gap:24px!important}
+.auth-header .auth-brand{flex:0 0 auto!important;max-width:180px!important;line-height:0!important}
+.auth-header .auth-brand img.logo-light,.auth-header .auth-brand img.logo-dark{width:168px!important;max-width:168px!important;height:74px!important;object-fit:contain!important;object-position:center!important;transition:none!important}
+.auth-header .auth-brand .brand-words{display:none!important}
+.auth-header .auth-nav nav{display:flex!important;align-items:center!important;justify-content:center!important;flex-wrap:wrap!important;gap:4px!important;margin-left:auto!important}
+.auth-header .auth-nav nav a{font-size:14px!important;font-weight:700!important;color:#445469!important;display:inline-flex!important;align-items:center!important;min-height:42px!important;padding:9px 13px!important;border-radius:9px!important;text-decoration:none!important}
+.auth-header .auth-nav nav a:hover,.auth-header .auth-nav nav a:focus-visible{color:#b71532!important;background:#f1f3f6!important}
+html[data-theme=dark] .auth-header .auth-nav nav a{color:#cbd4e2!important}
+html[data-theme=dark] .auth-header .auth-nav nav a:hover,html[data-theme=dark] .auth-header .auth-nav nav a:focus-visible{color:#fff!important;background:#253247!important}
+.auth-header .theme-button{width:43px!important;min-width:43px!important;height:43px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;border-radius:10px!important;border:1px solid #ced5df!important;background:#ffffff!important;color:#172638!important;padding:0!important;transition:background .15s ease!important}
+.auth-header .theme-button:hover{background:#edf0f5!important}
+html[data-theme=dark] .auth-header .theme-button{border-color:#3b4b62!important;background:#182738!important;color:#fff!important}
+html[data-theme=dark] .auth-header .theme-button:hover{background:#2b405a!important}
+.auth-header .theme-button svg{width:20px!important;height:20px!important;display:block!important}
+.auth-header .theme-button .theme-sun{display:block!important}.auth-header .theme-button .theme-moon{display:none!important}
+html[data-theme=dark] .auth-header .theme-button .theme-sun{display:none!important}
+html[data-theme=dark] .auth-header .theme-button .theme-moon{display:block!important}
+/* Misma identidad de cabecera en el inicio, sin modificar los botones funcionales */
+.site-header .header-actions .icon-button{width:43px!important;height:43px!important;border-radius:10px!important}
+.site-header .brand img.logo-light,.site-header .brand img.logo-dark{max-height:74px!important;object-fit:contain!important}
+/* Menos espacio redundante en el recorrido comercial */
+.hero{min-height:570px!important}
+.hero-inner{padding-top:75px!important;padding-bottom:78px!important}
+@media(max-width:850px){:root{--solucar-header-height:76px}.auth-header .auth-nav{gap:12px!important}.auth-header .auth-brand img.logo-light,.auth-header .auth-brand img.logo-dark{width:132px!important;max-width:132px!important;height:64px!important}.auth-header .auth-nav nav{gap:0!important}.auth-header .auth-nav nav a{font-size:12px!important;padding:8px!important}.auth-header .theme-button{width:40px!important;min-width:40px!important;height:40px!important}}
+@media(max-width:580px){.auth-header .auth-nav{flex-wrap:wrap!important;padding-block:8px!important}.auth-header .auth-nav nav{order:3!important;width:100%!important;justify-content:center!important}.auth-header .auth-nav nav a{font-size:11px!important;padding:7px!important;min-height:30px!important}.auth-header .theme-button{margin-left:auto!important}.hero{min-height:480px!important}}
