@@ -68,3 +68,175 @@ html:not([data-theme=dark]) body .auth-header{background:#fff!important}
 button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:3px solid var(--sm-ui-accent)!important;outline-offset:3px}
 @media(max-width:800px){.sm-confidence-grid,.sm-shopping-steps{grid-template-columns:1fr;gap:10px}.sm-shopping-steps article{padding:17px 18px}.sm-confidence{padding:14px 0}.sm-confidence-grid>div{padding:7px 14px}}
 @media(max-width:580px){.sm-detail-body{padding:15px 17px 22px}.sm-detail-head{padding:12px 16px 0}#productDetailPhoto{width:calc(100% - 32px);max-height:220px}.sm-detail-bottom .button{width:100%;justify-content:center}.sm-detail-actions{flex-direction:column;align-items:stretch}.sm-footer-legal{padding-bottom:22px}}
+
+/* SOLUCAR MÁS · Ajuste de jerarquía visual en cotización (05-11-2026, revisión 2)
+   Objetivo: menos saturación cromática, mejor separación de bloques y acentos más selectivos. */
+#cotizar .quote-wrap{
+  gap:clamp(22px,3vw,34px)!important;
+  align-items:stretch!important;
+}
+#cotizar .quote-aside,
+#cotizar .quote-card{
+  min-height:100%;
+}
+#cotizar .quote-aside{
+  position:relative!important;
+  top:auto!important;
+  padding:34px 34px 30px;
+  border:1px solid var(--line);
+  border-radius:24px;
+  background:linear-gradient(180deg,rgba(10,22,37,.84) 0%, rgba(7,18,31,.98) 100%);
+  box-shadow:0 20px 44px rgba(0,0,0,.20);
+}
+html:not([data-theme="dark"]) #cotizar .quote-aside{
+  background:linear-gradient(180deg,#0d1b2e 0%, #13263f 100%);
+  border-color:#20354f;
+}
+#cotizar .quote-aside .eyebrow{
+  color:#8ab9ff!important;
+  margin-bottom:16px;
+}
+html[data-theme="dark"] #cotizar .quote-aside .eyebrow{
+  color:#ff8a97!important;
+}
+#cotizar .quote-aside .eyebrow::before{
+  background:currentColor!important;
+  width:34px;
+}
+#cotizar .quote-aside h2{
+  color:#f7fbff;
+  margin-bottom:18px;
+  max-width:11ch;
+  letter-spacing:-.06em;
+}
+#cotizar .quote-aside h2 .blue-text{
+  color:inherit!important;
+}
+#cotizar .quote-aside h2::after{
+  content:"";
+  display:block;
+  width:84px;
+  height:4px;
+  border-radius:999px;
+  background:linear-gradient(90deg,var(--solucar-accent,var(--sm-ui-accent)), transparent);
+  margin-top:18px;
+}
+#cotizar .quote-aside .lead{
+  color:rgba(233,241,249,.84);
+  max-width:34rem;
+  margin-bottom:0;
+}
+#cotizar .quote-aside .surface-card{
+  margin-top:30px!important;
+  padding:24px 24px 22px;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.045);
+  box-shadow:none;
+}
+#cotizar .quote-aside .surface-card h3{
+  color:#ffffff;
+  font-size:1.18rem;
+  margin-bottom:12px;
+}
+#cotizar .quote-aside .surface-card p{
+  color:rgba(233,241,249,.76);
+  line-height:1.65;
+}
+#cotizar .quote-card{
+  border-radius:24px!important;
+  border:1px solid var(--line)!important;
+  box-shadow:0 20px 42px rgba(9,30,54,.10)!important;
+  background:var(--surface)!important;
+}
+#cotizar .quote-form-v19 .quote-form-heading{
+  background:linear-gradient(180deg,var(--surface) 0%, var(--surface2) 100%)!important;
+  padding-bottom:24px!important;
+}
+#cotizar .quote-form-v19 .quote-form-heading p{
+  max-width:44ch;
+}
+#cotizar .quote-form-v19 .quote-stage{
+  padding:26px 32px 28px!important;
+}
+#cotizar .quote-form-v19 .quote-stage + .quote-stage{
+  border-top:1px solid var(--line);
+}
+#cotizar .quote-form-v19 .quote-stage-title{
+  gap:15px!important;
+  margin-bottom:18px!important;
+}
+#cotizar .quote-form-v19 .quote-stage-index{
+  width:40px;
+  height:40px;
+  flex-basis:40px;
+  border-radius:14px;
+  background:var(--sm-ui-quiet)!important;
+  color:var(--solucar-accent,var(--sm-ui-accent))!important;
+  border:1px solid var(--sm-ui-border);
+  box-shadow:none!important;
+}
+html[data-theme="dark"] #cotizar .quote-form-v19 .quote-stage-index{
+  background:rgba(240,68,82,.08)!important;
+  border-color:rgba(240,68,82,.18);
+  color:#ff8390!important;
+}
+#cotizar .quote-form-v19 .quote-stage-title h4{
+  font-size:1.1rem!important;
+  margin-bottom:4px!important;
+}
+#cotizar .quote-form-v19 .quote-stage-title p{
+  font-size:.84rem!important;
+  max-width:46ch;
+}
+#cotizar .quote-form-v19 .field label{
+  color:var(--ink);
+  font-size:.82rem;
+  letter-spacing:.01em;
+}
+#cotizar .quote-form-v19 .field input,
+#cotizar .quote-form-v19 .field select,
+#cotizar .quote-form-v19 .field textarea{
+  background:var(--surface)!important;
+  border:1px solid var(--sm-ui-border)!important;
+  min-height:52px;
+}
+#cotizar .quote-form-v19 .field textarea{
+  min-height:152px;
+}
+#cotizar .quote-form-v19 .field input::placeholder,
+#cotizar .quote-form-v19 .field textarea::placeholder{
+  color:color-mix(in srgb, var(--muted) 76%, transparent);
+}
+#cotizar .quote-form-v19 .field .field-note,
+#cotizar .quote-form-v19 .form-help,
+#cotizar .quote-form-v19 .sm-form-privacy{
+  color:var(--muted)!important;
+}
+#cotizar .quote-form-v19 .sm-form-privacy a,
+#cotizar .quote-form-v19 .form-help a{
+  color:var(--solucar-accent,var(--sm-ui-accent));
+}
+#cotizar .quote-form-v19 .phone-combo{
+  gap:14px!important;
+}
+#cotizar .quote-form-v19 .quote-form-footer{
+  padding:24px 32px 32px!important;
+  background:linear-gradient(180deg,var(--surface) 0%, var(--surface2) 100%);
+}
+#cotizar .quote-form-v19 .quote-form-footer .button-primary{
+  min-height:50px;
+  padding-inline:26px;
+}
+@media(max-width:850px){
+  #cotizar .quote-wrap{grid-template-columns:1fr!important;}
+  #cotizar .quote-aside{padding:28px 24px 25px;}
+}
+@media(max-width:580px){
+  #cotizar .quote-aside{padding:24px 20px 20px;border-radius:20px;}
+  #cotizar .quote-aside h2{max-width:none;}
+  #cotizar .quote-aside .surface-card{padding:20px 18px;}
+  #cotizar .quote-form-v19 .quote-stage{padding:22px 20px 23px!important;}
+  #cotizar .quote-form-v19 .quote-form-footer{padding:20px!important;}
+  #cotizar .quote-form-v19 .quote-stage-index{width:36px;height:36px;flex-basis:36px;}
+}
