@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://solucarmas.cl/sitemap.xml

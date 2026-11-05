@@ -1,12 +1,13 @@
-<!doctype html>
-<html lang="es" data-theme="light">
+<!DOCTYPE html>
+
+<html data-theme="light" lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="robots" content="noindex,nofollow">
-  <title>Resultado de tu pago | SOLUCAR MÁS</title>
-  <meta name="description" content="Revisa la confirmación de tu pago de SOLUCAR MÁS mediante Transbank.">
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="noindex,nofollow" name="robots"/>
+<title>Resultado de tu pago | SOLUCAR MÁS</title>
+<meta content="Revisa la confirmación de tu pago de SOLUCAR MÁS mediante Transbank." name="description"/>
+<style>
     :root{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color-scheme:light;--bg:#f9f7fa;--surface:#fff;--text:#101e32;--muted:#65748a;--line:#e9e0e5;--accent:#cb1b3a}
     [data-theme=dark]{color-scheme:dark;--bg:#130f19;--surface:#261d2a;--text:#f8faff;--muted:#aebbd0;--line:#50404c}
     *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);line-height:1.55}header{background:#09233f;color:#fff;padding:20px 24px}header a{color:#fff;text-decoration:none;font-weight:900;letter-spacing:.08em}
@@ -16,23 +17,23 @@
     .note{font-size:.83rem;color:var(--muted)}.status-approved{color:#087b50}.status-rejected{color:#d12448}.status-pending{color:#9c6412}
     @media(max-width:520px){.card{padding:27px 20px}}
   </style>
-</head>
+<link href="favicon.png" rel="icon"/><link href="apple-touch-icon.png" rel="apple-touch-icon"/></head>
 <body>
-  <header><a href="index.html">SOLUCAR MÁS</a></header>
-  <main><section class="card" aria-live="polite">
-    <p class="stamp">Transbank · Webpay Plus</p>
-    <h1 id="resultTitle">Verificando tu pago…</h1>
-    <p id="resultMessage">Consultando el estado real del pedido con SOLUCAR MÁS. La página no confirma pagos basándose en la dirección del navegador.</p>
-    <div class="detail" id="receiptDetails" hidden>
-      <div><span>Orden</span><strong id="receiptOrder">—</strong></div>
-      <div><span>Total de productos</span><strong id="receiptAmount">—</strong></div>
-      <div><span>Estado</span><strong id="receiptStatus">—</strong></div>
-    </div>
-    <p class="note">¿Tienes dudas? Escríbenos a <a href="mailto:contacto@solucarmas.cl">contacto@solucarmas.cl</a> e indica el número de orden. No vuelvas a pagar si el estado es incierto.</p>
-    <div class="actions"><a class="btn primary" href="index.html">Volver al inicio</a><a class="btn" href="tienda.html">Ir a la tienda</a><button class="btn" id="retryButton" type="button">Consultar nuevamente</button></div>
-  </section></main>
-  <script src="supabase-config.js?v=webpay-20261104"></script>
-  <script>
+<header><a href="index.html">SOLUCAR MÁS</a></header>
+<main><section aria-live="polite" class="card">
+<p class="stamp">Transbank · Webpay Plus</p>
+<h1 id="resultTitle">Verificando tu pago…</h1>
+<p id="resultMessage">Consultando el estado real del pedido con SOLUCAR MÁS. La página no confirma pagos basándose en la dirección del navegador.</p>
+<div class="detail" hidden="" id="receiptDetails">
+<div><span>Orden</span><strong id="receiptOrder">—</strong></div>
+<div><span>Total de productos</span><strong id="receiptAmount">—</strong></div>
+<div><span>Estado</span><strong id="receiptStatus">—</strong></div>
+</div>
+<p class="note">¿Tienes dudas? Escríbenos a <a href="mailto:contacto@solucarmas.cl">contacto@solucarmas.cl</a> e indica el número de orden. No vuelvas a pagar si el estado es incierto.</p>
+<div class="actions"><a class="btn primary" href="index.html">Volver al inicio</a><a class="btn" href="tienda.html">Ir a la tienda</a><button class="btn" id="retryButton" type="button">Consultar nuevamente</button></div>
+</section></main>
+<script src="supabase-config.js?v=webpay-20261104"></script>
+<script>
   (() => {
     'use strict';
     try { const theme = localStorage.getItem('solucar-theme'); if (theme === 'dark') document.documentElement.dataset.theme = theme; } catch {}

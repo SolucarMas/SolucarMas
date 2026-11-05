@@ -1,8 +1,9 @@
-<!doctype html>
-<html lang="es" data-theme="dark"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<!DOCTYPE html>
+
+<html data-theme="dark" lang="es"><head>
+<meta charset="utf-8"/><meta content="width=device-width, initial-scale=1" name="viewport"/>
 <title>Administración de productos | SOLUCAR MÁS</title>
-<meta name="robots" content="noindex,nofollow">
+<meta content="noindex,nofollow" name="robots"/>
 <style>
 :root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#eaf0f9;background:#0b121c;--paper:#162230;--outline:#314355;--muted:#b0c0d0;--red:#e42d49}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 90% -5%,#243343,#0b121c 45%);min-height:100vh}a{color:#e8a0ac}header{background:#0b1724;border-bottom:2px solid #b31a33}header .wrap{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1.1rem 0}
@@ -14,21 +15,21 @@ label{display:grid;gap:6px;color:#eff3fb;font-size:.86rem;font-weight:650;margin
  @media(max-width:610px){.item-actions{grid-column:2;justify-content:flex-start}.item-actions button{grid-column:auto}}
  </style>
 <script src="supabase-config.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script defer src="administracion.js?v=20261105-delete-2"></script>
-</head><body>
+<script defer="" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script defer="" src="administracion.js?v=20261105-delete-2"></script>
+<link href="mejoras-20261105.css?v=1" rel="stylesheet"/></head><body>
 <header><div class="wrap"><div class="brand">SOLUCAR <b>MÁS</b> <span style="font-weight:450;color:#b8c6d5">/ Administración</span></div><a href="tienda.html">Volver a la tienda</a></div></header>
 <main class="wrap"><h1>Gestión de productos</h1><p class="intro">Actualiza nombres, precios, categorías, visibilidad y fotografías. Los precios guardados se sincronizan con la tienda y el servidor de pagos.</p>
-<section id="loginBox" class="card login"><h2>Acceso del administrador</h2><p>Inicia sesión con la cuenta que autorizaste en Supabase.</p><form id="loginForm"><label>Correo electrónico<input id="adminEmail" autocomplete="username" type="email" value="contacto@solucar.cl" required></label><label>Contraseña<input id="adminPassword" autocomplete="current-password" type="password" required></label><button type="submit">Iniciar sesión</button></form><p id="loginStatus" class="status" role="status"></p></section>
-<section id="dashboard" class="hidden">
-<div class="card heading-row"><div><strong id="loggedUser">Administrador</strong><p>Solo los usuarios autorizados mediante Supabase pueden guardar cambios.</p></div><button id="logoutBtn" class="secondary" type="button">Cerrar sesión</button></div>
-<div class="card"><div class="heading-row"><div><h2>Catálogo de la tienda</h2><p id="productCount"></p></div><button id="newBtn" type="button">+ Nuevo producto</button></div><div id="productList" class="items"></div><p id="listStatus" class="status" role="status"></p></div>
-<div id="productEditor" class="card hidden"><div class="heading-row"><h2 id="editorTitle">Editar producto</h2><button id="cancelBtn" class="secondary" type="button">Cancelar</button></div>
-<form id="productForm"><div class="grid"><label>ID del producto <input id="productId" maxlength="50" readonly placeholder="Se genera automáticamente"/></label><label>Nombre del producto <input id="productName" maxlength="130" required placeholder="Ej.: Filtro de combustible"/></label><label>Categoría <input id="productCategory" maxlength="60" required placeholder="Ej.: Filtros"/></label><label>Precio en pesos chilenos (CLP) <input id="productPrice" type="number" min="1" max="5000000" step="1" required/></label><label class="wide">Descripción / compatibilidad <textarea id="productDetails" maxlength="750" placeholder="Especificaciones y vehículo compatible"></textarea></label>
-<label>Orden en la tienda <input id="productSort" type="number" min="0" max="99999" step="1" value="100"/></label><div class="check-line"><input id="productActive" type="checkbox" checked/><label for="productActive">Producto visible en la tienda</label></div>
-<label class="wide">Fotografía (JPG, PNG o WebP, máximo 5 MB)<input id="productPhoto" type="file" accept="image/jpeg,image/png,image/webp"/></label>
-<div class="wide"><img id="productPreview" class="photo-preview hidden" alt="Vista previa de la fotografía"><p class="item-meta">Si no cargas una imagen nueva, se conservará la actual. Los productos originales mantienen su foto referencial hasta reemplazarla.</p></div>
-</div><div class="inline"><button id="saveBtn" type="submit">Guardar producto</button><button type="button" class="secondary" id="resetPhotoBtn">Descartar foto seleccionada</button></div><p id="editStatus" class="status" role="status"></p></form>
+<section class="card login" id="loginBox"><h2>Acceso del administrador</h2><p>Inicia sesión con la cuenta que autorizaste en Supabase.</p><form id="loginForm"><label>Correo electrónico<input autocomplete="username" id="adminEmail" required="" type="email" value="contacto@solucar.cl"/></label><label>Contraseña<input autocomplete="current-password" id="adminPassword" required="" type="password"/></label><button type="submit">Iniciar sesión</button></form><p class="status" id="loginStatus" role="status"></p></section>
+<section class="hidden" id="dashboard">
+<div class="card heading-row"><div><strong id="loggedUser">Administrador</strong><p>Solo los usuarios autorizados mediante Supabase pueden guardar cambios.</p></div><button class="secondary" id="logoutBtn" type="button">Cerrar sesión</button></div>
+<div class="card"><div class="heading-row"><div><h2>Catálogo de la tienda</h2><p id="productCount"></p><div class="sm-admin-filter"><label for="adminSearch">Buscar productos</label><input autocomplete="off" id="adminSearch" placeholder="Buscar por nombre, código o categoría" type="search"/><label class="sm-admin-check"><input id="adminActiveOnly" type="checkbox"/>Solo visibles</label></div></div><button id="newBtn" type="button">+ Nuevo producto</button></div><div class="items" id="productList"></div><p class="status" id="listStatus" role="status"></p></div>
+<div class="card hidden" id="productEditor"><div class="heading-row"><h2 id="editorTitle">Editar producto</h2><button class="secondary" id="cancelBtn" type="button">Cancelar</button></div>
+<form id="productForm"><div class="grid"><label>ID del producto <input id="productId" maxlength="50" placeholder="Se genera automáticamente" readonly=""/></label><label>Nombre del producto <input id="productName" maxlength="130" placeholder="Ej.: Filtro de combustible" required=""/></label><label>Categoría <input id="productCategory" maxlength="60" placeholder="Ej.: Filtros" required=""/></label><label>Precio en pesos chilenos (CLP) <input id="productPrice" max="5000000" min="1" required="" step="1" type="number"/></label><label class="wide">Descripción / compatibilidad <textarea id="productDetails" maxlength="750" placeholder="Especificaciones y vehículo compatible"></textarea></label>
+<label>Orden en la tienda <input id="productSort" max="99999" min="0" step="1" type="number" value="100"/></label><div class="check-line"><input checked="" id="productActive" type="checkbox"/><label for="productActive">Producto visible en la tienda</label></div>
+<label class="wide">Fotografía (JPG, PNG o WebP, máximo 5 MB)<input accept="image/jpeg,image/png,image/webp" id="productPhoto" type="file"/></label>
+<div class="wide"><img alt="Vista previa de la fotografía" class="photo-preview hidden" id="productPreview"/><p class="item-meta">Si no cargas una imagen nueva, se conservará la actual. Los productos originales mantienen su foto referencial hasta reemplazarla.</p></div>
+</div><div class="inline"><button id="saveBtn" type="submit">Guardar producto</button><button class="secondary" id="resetPhotoBtn" type="button">Descartar foto seleccionada</button></div><p class="status" id="editStatus" role="status"></p></form>
 </div></section>
 </main><footer class="wrap">SOLUCAR MÁS · Panel protegido con Supabase Auth, permisos RLS y Storage.</footer>
 </body></html>

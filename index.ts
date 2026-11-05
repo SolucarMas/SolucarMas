@@ -8,16 +8,6 @@ type Order = {
   id: string; buy_order: string; session_id: string; token_ws: string | null;
   amount_clp: number; status: string; items: Item[];
 };
-const CATALOG: Record<string, { name: string; price: number }> = {
-  'filter-oil': { name: 'Filtro de aceite universal', price: 8900 },
-  'filter-air': { name: 'Filtro de aire para motor', price: 12900 },
-  'oil-5w30': { name: 'Aceite de motor sintético 5W-30 · 4 L', price: 29900 },
-  'oil-15w40': { name: 'Aceite multigrado 15W-40 · 4 L', price: 25900 },
-  pads: { name: 'Pastillas de freno delanteras', price: 27900 },
-  bulb: { name: 'Ampolleta halógena H7', price: 6900 },
-  wipers: { name: 'Limpiaparabrisas · unidad', price: 9900 },
-  coolant: { name: 'Refrigerante de motor · 1 L', price: 7500 },
-};
 const env = (name: string) => Deno.env.get(name)?.trim() || '';
 const site = env('WEBPAY_SITE_URL') || 'https://solucarmas.cl';
 const siteOrigin = new URL(site).origin;
@@ -95,7 +85,7 @@ async function start(req: Request): Promise<Response> {
   const responseHeaders = cors(req);
   if (!allowedOrigins.has(req.headers.get('origin') || '')) return json({ ok: false, error: 'Origen no autorizado.' }, 403, responseHeaders);
   if (!commerceCode || !apiKey) return json({ ok: false, error: 'El comercio aún no configuró las credenciales de Webpay.' }, 503, responseHeaders);
-  // Protección intencional: los precios actuales son ilustrativos y NO están confirmados como precios comerciales.
+  // Protección intencional: jamás activar cobros de producción hasta confirmar stock y condiciones comerciales.
   if (environment === 'production' && env('WEBPAY_CATALOG_READY') !== 'true')
     return json({ ok: false, error: 'La tienda aún debe confirmar precios, stock y condiciones de despacho antes de activar cobros reales.' }, 503, responseHeaders);
   let payload: Record<string, unknown>;
@@ -111,17 +101,35 @@ async function start(req: Request): Promise<Response> {
     return json({ ok: false, error: 'Completa tus datos de contacto correctamente.' }, 400, responseHeaders);
   if (!Array.isArray(payload.items) || !payload.items.length || payload.items.length > 8)
     return json({ ok: false, error: 'Carrito inválido.' }, 400, responseHeaders);
+  // Los precios y nombres los obtiene el SERVIDOR desde Supabase, no del navegador.
+  // Rechaza productos ocultos, borrados o con un precio cambiado.
   const ids = new Set<string>();
-  const items: Item[] = [];
+  const requested: { id: string; qty: number; expectedPrice: number }[] = [];
   for (const raw of payload.items) {
     if (!raw || typeof raw !== 'object') return json({ ok: false, error: 'Producto inválido.' }, 400, responseHeaders);
     const data = raw as Record<string, unknown>;
     const id = typeof data.id === 'string' ? data.id : '';
     const qty = data.qty;
-    if (!CATALOG[id] || ids.has(id) || !Number.isInteger(qty) || Number(qty) < 1 || Number(qty) > 20)
+    const expectedPrice = data.expectedPrice;
+    if (!/^[a-z0-9-]{3,50}$/.test(id) || ids.has(id) || !Number.isInteger(qty) || Number(qty) < 1 || Number(qty) > 20 || !Number.isInteger(expectedPrice))
       return json({ ok: false, error: 'Revisa los productos y cantidades.' }, 400, responseHeaders);
     ids.add(id);
-    items.push({ id, nombre: CATALOG[id].name, cantidad: Number(qty), precio: CATALOG[id].price, subtotal: Number(qty) * CATALOG[id].price });
+    requested.push({ id, qty: Number(qty), expectedPrice: Number(expectedPrice) });
+  }
+  const { data: dbProducts, error: catalogError } = await admin.from('store_products')
+    .select('id,name,price_clp,active').in('id', [...ids]);
+  if (catalogError || !dbProducts || dbProducts.length !== requested.length)
+    return json({ ok: false, error: 'Un producto ya no está disponible en el catálogo.' }, 409, responseHeaders);
+  const byId = new Map(dbProducts.map(p => [p.id, p]));
+  const items: Item[] = [];
+  for (const requestItem of requested) {
+    const product = byId.get(requestItem.id);
+    if (!product?.active || typeof product.name !== 'string' || !Number.isInteger(product.price_clp) || product.price_clp < 1 || product.price_clp > 5000000)
+      return json({ ok: false, error: 'Uno de los productos ya no está disponible.' }, 409, responseHeaders);
+    if (product.price_clp !== requestItem.expectedPrice)
+      return json({ ok: false, error: 'Los precios cambiaron. Actualiza el carrito antes de pagar.' }, 409, responseHeaders);
+    items.push({ id: product.id, nombre: product.name, cantidad: requestItem.qty,
+      precio: product.price_clp, subtotal: requestItem.qty * product.price_clp });
   }
   const amount = items.reduce((sum, item) => sum + item.subtotal, 0);
   if (amount <= 0 || amount > 5000000) return json({ ok: false, error: 'Monto de compra no permitido.' }, 400, responseHeaders);

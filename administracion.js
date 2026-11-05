@@ -31,7 +31,11 @@
   function draw(){
     const root=$('#productList');root.replaceChildren();
     $('#productCount').textContent=`${products.length} productos · ${products.filter(p=>p.active).length} visibles`;
-    for(const p of products){
+    const search=($('#adminSearch')?.value||'').toLocaleLowerCase('es-CL').trim();
+    const activeOnly=!!$('#adminActiveOnly')?.checked;
+    const visible=products.filter(p=>(!activeOnly||p.active)&&(`${p.name} ${p.category} ${p.id} ${p.details||''}`).toLocaleLowerCase('es-CL').includes(search));
+    if(!visible.length){const msg=document.createElement('p');msg.textContent='No hay productos que coincidan con los filtros.';root.append(msg);}
+    for(const p of visible){
       const item=document.createElement('article');item.className='item';
       const image=document.createElement('img');image.alt='Imagen de '+p.name;
       image.src=publicPhoto(p.image_path)||'data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 150"><rect width="180" height="150" fill="#e9edf2"/><text x="90" y="78" text-anchor="middle" font-family="Arial" font-size="14" fill="#55677b">Foto actual / referencia</text></svg>');
@@ -42,12 +46,30 @@
       const edit=document.createElement('button');edit.type='button';edit.textContent='Editar';edit.className='secondary';edit.addEventListener('click',()=>openEditor(p));
       const actions=document.createElement('div');actions.className='item-actions';
       actions.append(edit);
+      const toggle=document.createElement('button');toggle.type='button';toggle.className='secondary';toggle.textContent=p.active?'Ocultar':'Publicar';
+      toggle.setAttribute('aria-label',(p.active?'Ocultar':'Publicar')+' producto '+p.name);
+      toggle.addEventListener('click',()=>toggleVisibility(p,toggle));actions.append(toggle);
       const remove=document.createElement('button');remove.type='button';remove.className='danger';remove.textContent='Eliminar';
       remove.setAttribute('aria-label','Eliminar producto '+p.name);
       remove.addEventListener('click',()=>deleteProduct(p,remove));
       actions.append(remove);
       item.append(image,details,actions);root.append(item);
     }
+  }
+  // Cambiar visibilidad sin borrar el registro ni las fotos; RLS exige administración autorizada.
+  async function toggleVisibility(product,button){
+    button.disabled=true;
+    const next=!product.active;
+    status('#listStatus',(next?'Publicando':'Ocultando')+' «'+product.name+'»…');
+    try{
+      const {data,error}=await db.from('store_products').update({active:next,updated_at:new Date().toISOString()})
+        .eq('id',product.id).select('id,active');
+      if(error)throw error;
+      if(!data?.length)throw Error('No se modificó el producto. Revisa la política RLS.');
+      await loadProducts();
+      status('#listStatus','«'+product.name+'» '+(next?'aparece':'ya no aparece')+' en la tienda.');
+    }catch(err){status('#listStatus','Error: '+(err.message||'No se pudo actualizar.'),true)}
+    finally{button.disabled=false}
   }
   // Borrado real del catálogo, con autorización RLS. Los pedidos anteriores
   // conservan una instantánea de los productos comprados (webpay_orders.items).
@@ -115,6 +137,8 @@
     $('#adminPassword').value='';await checkAccess();
   });
   $('#logoutBtn').addEventListener('click',async()=>{await db.auth.signOut();dashboard.classList.add('hidden');login.classList.remove('hidden');status('#loginStatus','Sesión cerrada.');});
+  $('#adminSearch')?.addEventListener('input',draw);
+  $('#adminActiveOnly')?.addEventListener('change',draw);
   $('#newBtn').addEventListener('click',()=>openEditor());
   $('#cancelBtn').addEventListener('click',()=>$('#productEditor').classList.add('hidden'));
   $('#productForm').addEventListener('submit',save);

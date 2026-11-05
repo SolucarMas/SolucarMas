@@ -86,7 +86,7 @@
     if(!ready)return inform('El catálogo todavía no está disponible.','error');
     if(missingProduct)return inform('Tu carrito contiene un producto que ya no está disponible. Actualízalo antes de pagar.','error');
     if(!lines.length)return inform('El carrito está vacío o los productos ya no están disponibles.','error');
-    const customer=Object.fromEntries(new FormData(form).entries());delete customer.medio_pago;
+    const customer=Object.fromEntries(new FormData(form).entries());delete customer.medio_pago;delete customer.acepta_condiciones;
     customer.telefono=normalizePhone(customer.telefono,$('#orderPhoneCountry')?.value);
     customer.comuna=titleCase(customer.comuna);
     if(customer.telefono.replace(/\D/g,'').length<8)return inform('Revisa el número de teléfono.','error');
