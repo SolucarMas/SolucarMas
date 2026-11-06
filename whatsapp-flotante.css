@@ -1,0 +1,28 @@
+/* SOLUCAR MÁS · Nube de WhatsApp móvil y escritorio */
+#sm-wa-widget{position:fixed;right:18px;bottom:84px;z-index:60;width:min(288px,calc(100vw - 28px));font-family:inherit;touch-action:none;user-select:none;-webkit-user-select:none;filter:drop-shadow(0 12px 20px rgba(3,23,24,.20));animation:smWaEnter .55s cubic-bezier(.2,.9,.2,1) both}
+@keyframes smWaEnter{from{opacity:0;transform:translateY(45px) scale(.91)}to{opacity:1;transform:translateY(0) scale(1)}}
+#sm-wa-widget.sm-wa-dragging{animation:none;cursor:grabbing;transition:none}
+#sm-wa-widget .sm-wa-card{position:relative;display:flex;gap:11px;align-items:center;border:1px solid rgba(8,130,83,.2);background:#fff;color:#14283b;border-radius:21px 21px 7px 21px;padding:13px 34px 13px 13px;box-shadow:0 15px 32px rgba(12,34,49,.14)}
+#sm-wa-widget .sm-wa-card::after{content:"";position:absolute;right:8px;bottom:-10px;border-top:11px solid #fff;border-left:11px solid transparent;filter:drop-shadow(0 1px 0 rgba(8,130,83,.15))}
+#sm-wa-widget .sm-wa-icon{display:grid;place-items:center;flex:0 0 40px;width:40px;height:40px;border-radius:50%;background:#18b879;color:white;text-decoration:none}
+#sm-wa-widget .sm-wa-icon svg{width:23px;height:23px;fill:currentColor}
+#sm-wa-widget .sm-wa-copy{min-width:0;flex:1}
+#sm-wa-widget .sm-wa-copy strong{font-size:13px;font-weight:850;display:block;line-height:1.25;color:#152a39}
+#sm-wa-widget .sm-wa-copy span{font-size:12px;line-height:1.35;display:block;color:#516576;margin-top:3px}
+#sm-wa-widget .sm-wa-copy a{color:#087f59;font-size:12px;font-weight:900;display:inline-block;margin-top:5px;text-decoration:underline;text-underline-offset:2px}
+#sm-wa-widget .sm-wa-close{position:absolute;right:8px;top:8px;width:24px;height:24px;border:0;border-radius:50%;background:#eef3f4;color:#415362;font-size:19px;line-height:1;display:grid;place-items:center;cursor:pointer;padding:0}
+#sm-wa-widget .sm-wa-hint{font-size:10px;color:#72828b;margin-top:4px}
+#sm-wa-widget .sm-wa-mini{display:none;align-items:center;justify-content:center;gap:6px;min-height:43px;padding:9px 13px;border:0;border-radius:999px;cursor:pointer;background:#168b63;color:white;font:800 12px/1.1 inherit;box-shadow:0 8px 24px rgba(13,94,65,.24);margin-left:auto}
+#sm-wa-widget.sm-wa-collapsed{width:112px}
+#sm-wa-widget.sm-wa-collapsed .sm-wa-card{display:none}
+#sm-wa-widget.sm-wa-collapsed .sm-wa-mini{display:flex}
+#sm-wa-widget.sm-wa-collapsed{filter:none}
+#sm-wa-widget.sm-wa-collapsed .sm-wa-mini svg{width:20px;height:20px;fill:currentColor}
+html[data-theme="dark"] #sm-wa-widget .sm-wa-card{background:#132635;border-color:#31505b;color:#edf8ff}
+html[data-theme="dark"] #sm-wa-widget .sm-wa-card::after{border-top-color:#132635}
+html[data-theme="dark"] #sm-wa-widget .sm-wa-copy strong{color:#fff}
+html[data-theme="dark"] #sm-wa-widget .sm-wa-copy span{color:#b9d0da}
+html[data-theme="dark"] #sm-wa-widget .sm-wa-copy a{color:#6de1b0}
+html[data-theme="dark"] #sm-wa-widget .sm-wa-close{background:#304652;color:#fff}
+@media(max-width:650px){#sm-wa-widget{right:12px;bottom:75px;width:min(245px,calc(100vw - 24px))}#sm-wa-widget .sm-wa-card{padding:11px 31px 11px 11px;gap:9px;border-radius:18px 18px 7px 18px}#sm-wa-widget .sm-wa-icon{width:34px;height:34px;flex-basis:34px}#sm-wa-widget .sm-wa-icon svg{width:20px;height:20px}#sm-wa-widget .sm-wa-copy strong{font-size:12px}#sm-wa-widget .sm-wa-copy span{font-size:11px}#sm-wa-widget .sm-wa-copy a{font-size:11px}#sm-wa-widget .sm-wa-hint{display:none}}
+@media(prefers-reduced-motion:reduce){#sm-wa-widget{animation:none}}
