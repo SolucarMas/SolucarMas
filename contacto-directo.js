@@ -29,6 +29,8 @@
       nombre: String(fields.get('nombre') || '').trim(),
       correo: String(fields.get('correo') || '').trim(),
       motivo: String(fields.get('motivo') || '').trim(),
+      telefono: String(fields.get('telefono') || '').trim(),
+      empresa: String(fields.get('empresa') || '').trim(),
       mensaje: String(fields.get('mensaje') || '').trim(),
       empresa_web: ''
     };
