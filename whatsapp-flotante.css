@@ -60,3 +60,23 @@ html[data-theme="dark"] #sm-wa-widget .sm-wa-copy a{color:#6de1b0}
 html[data-theme="dark"] #sm-wa-widget .sm-wa-close{background:#304652;color:#fff}
 @media(max-width:650px){#sm-wa-widget{right:12px;bottom:75px;width:min(245px,calc(100vw - 24px))}#sm-wa-widget .sm-wa-card{padding:11px 31px 11px 11px;gap:9px;border-radius:18px 18px 7px 18px}#sm-wa-widget .sm-wa-icon{width:34px;height:34px;flex-basis:34px}#sm-wa-widget .sm-wa-icon .sm-wa-mark{width:20px;height:20px}#sm-wa-widget .sm-wa-copy strong{font-size:12px}#sm-wa-widget .sm-wa-copy span{font-size:11px}#sm-wa-widget .sm-wa-copy a{font-size:11px}#sm-wa-widget .sm-wa-hint{display:none}#sm-wa-widget.sm-wa-collapsed{width:56px!important}}
 @media(prefers-reduced-motion:reduce){#sm-wa-widget{animation:none}}
+
+
+/* V4: el ícono rasterizado es independiente de estilos SVG de todo el sitio. */
+#sm-wa-widget .sm-wa-mini > img.sm-wa-mark {
+  width:32px!important;
+  height:32px!important;
+  display:block!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  transform:none!important;
+  filter:none!important;
+  opacity:1!important;
+}
+#sm-wa-widget .sm-wa-icon > img.sm-wa-mark {
+  object-fit:contain!important;
+  object-position:center!important;
+  transform:none!important;
+  filter:none!important;
+  opacity:1!important;
+}
